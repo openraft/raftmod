@@ -808,8 +808,8 @@ github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd/go.mod h1:6dJ
 github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742/go.mod h1:bx2lNnkwVCuqBIxFjflWJWanXIb3RllmbCylyMrvgv0=
 github.com/modern-go/reflect2 v1.0.1/go.mod h1:bx2lNnkwVCuqBIxFjflWJWanXIb3RllmbCylyMrvgv0=
 github.com/mwitkow/go-conntrack v0.0.0-20161129095857-cc309e4a2223/go.mod h1:qRWi+5nqEBWmkhHvq77mSJWrCKwh8bxhgT7d/eI7P4U=
-github.com/openraft/raftapi v1.2.0 h1:maIsG7xYK25imFFyMwqUCSayzXv2jP1otr2BpEwfzdQ=
-github.com/openraft/raftapi v1.2.0/go.mod h1:SM7vTCyooeneLl5jzdw/CSi6G3CpbwGwFdMCd6aEbNw=
+github.com/openraft/raftapi v1.2.1 h1:XL5+YPKQ53EI5xRghOwdeNdGRNPVrkQxnqDCqLyM1/0=
+github.com/openraft/raftapi v1.2.1/go.mod h1:bbOINd6irQpw6X/VHFdm9r7uXuGVlT2VU0JDZVeoOo4=
 github.com/openraft/raftbadger v1.2.0 h1:D5e63IUoRfGlzn0aSw0rbV0nzZCS72zYCjT1Nf4R0Hc=
 github.com/openraft/raftbadger v1.2.0/go.mod h1:ZKqSvibUGibS1rj7YQbQbr0mHAdBzowo8SvWkmpnqOc=
 github.com/openraft/raftpb v1.2.0 h1:3qQ20PAAHJOuemdD9OtY31l4mWqJEywic6e7VA8b/iM=
@@ -865,10 +865,10 @@ github.com/spf13/cobra v0.0.5/go.mod h1:3K3wKZymM7VvHMDS9+Akkh4K60UwM26emMESw8tL
 github.com/spf13/jwalterweatherman v1.0.0/go.mod h1:cQK4TGJAtQXfYWX+Ddv3mKDzgVb68N+wFjFa4jdeBTo=
 github.com/spf13/pflag v1.0.3/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnInEg4=
 github.com/spf13/viper v1.3.2/go.mod h1:ZiWeW+zYFKm7srdB9IoDzzZXaJaI5eL9QjNiN/DMA2s=
-github.com/sprintframework/sprint v1.2.0 h1:eqRwdWqUo5B6DSEHLmidQvm5KsVPPp+3fG+oRhLdCn4=
-github.com/sprintframework/sprint v1.2.0/go.mod h1:RH3UhGu2EHCuqRBTtOR3QagUnkvy6qEHSigLtuaQkrE=
-github.com/sprintframework/sprintpb v1.2.0 h1:G7MteKJoMX8LIY0t4tOfrNr0uL3s/jXi7vTrnWt1vpk=
-github.com/sprintframework/sprintpb v1.2.0/go.mod h1:Cuk1DcfvNYTjWJ2xqutDZmRmhwN+FRrAYGkV5dT8mio=
+github.com/sprintframework/sprint v1.3.0 h1:fsrI6E66UlUClN3AWdgcJcDg0Ydy29ZN4NZIbLupJMM=
+github.com/sprintframework/sprint v1.3.0/go.mod h1:ssu7bTol76CG/yAEa2kDU990+4j3kNTCsGvowbIo6+I=
+github.com/sprintframework/sprintpb v1.3.0 h1:QVdhSOprZWwgXhu9aBiNHBlnl42SflaU+MX5e24+yKo=
+github.com/sprintframework/sprintpb v1.3.0/go.mod h1:Cuk1DcfvNYTjWJ2xqutDZmRmhwN+FRrAYGkV5dT8mio=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.4.0/go.mod h1:YvHI0jy2hoMjB+UWwv71VJQ9isScKT/TqJzVSSt89Yw=
@@ -929,8 +929,6 @@ golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9/go.mod h1:LzIPMQfyMNhhGPh
 golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b/go.mod h1:T9bdIzuCu7OtxOm1hfPfRQxPLYneinmdGuTeoZ9dtd4=
 golang.org/x/crypto v0.0.0-20210921155107-089bfa567519/go.mod h1:GvvjBRRGRdwPK5ydBHafDWAxML/pGHZbMvKqRZ5+Abc=
 golang.org/x/crypto v0.0.0-20211108221036-ceb1ce70b4fa/go.mod h1:GvvjBRRGRdwPK5ydBHafDWAxML/pGHZbMvKqRZ5+Abc=
-golang.org/x/crypto v0.6.0 h1:qfktjS5LUO+fFKeJXZ+ikTRijMmljikvG68fpMMruSc=
-golang.org/x/crypto v0.6.0/go.mod h1:OFC/31mSvZgRz0V1QTNCzfAI1aIRzbiufJtkMIlEp58=
 golang.org/x/exp v0.0.0-20180321215751-8460e604b9de/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
 golang.org/x/exp v0.0.0-20180807140117-3d87b88a115f/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
 golang.org/x/exp v0.0.0-20190121172915-509febef88a4/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
