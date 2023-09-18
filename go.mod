@@ -8,10 +8,10 @@ require (
 	github.com/go-errors/errors v1.4.2
 	github.com/hashicorp/raft v1.5.0
 	github.com/keyvalstore/store v1.3.0
-	github.com/openraft/raftapi v1.2.1
+	github.com/openraft/raftapi v1.2.2
 	github.com/openraft/raftbadger v1.2.0
 	github.com/pkg/errors v0.9.1
-	github.com/sprintframework/sprint v1.3.0
+	github.com/sprintframework/sprint v1.3.1
 	github.com/stretchr/testify v1.8.2
 	go.uber.org/atomic v1.10.0
 	go.uber.org/zap v1.24.0
