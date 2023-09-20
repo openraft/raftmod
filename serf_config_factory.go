@@ -17,7 +17,7 @@ import (
 	"strconv"
 )
 
-var SerfConfigClass = reflect.TypeOf((*serf.Config)(nil)).Elem()
+var SerfConfigClass = reflect.TypeOf((*serf.Config)(nil))
 
 type implSerfConfigFactory struct {
 
