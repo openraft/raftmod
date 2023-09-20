@@ -134,7 +134,7 @@ func (t *implRaftServer) Bind() (err error) {
 			Output: os.Stderr,
 			Level:  hclog.DefaultLevel,
 		})
-		config := &raft.NetworkTransportConfig{MaxPool: t.MaxPool, Timeout: t.Timeout, Logger: logger,
+		config := &raft.NetworkTransportConfig{Stream: stream, MaxPool: t.MaxPool, Timeout: t.Timeout, Logger: logger,
 			ServerAddressProvider: t.ServerLookup}
 		return raft.NewNetworkTransportWithConfig(config)
 
