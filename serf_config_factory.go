@@ -59,9 +59,9 @@ func (t *implSerfConfigFactory) Object() (object interface{}, err error) {
 		return nil, err
 	}
 
-	snapshotPath := filepath.Join(dataDir, "serf.snapshot")
+	snapshotFolder := filepath.Join(dataDir, "serf")
 
-	if err := createDirIfNeeded(snapshotPath, t.DataDirPerm); err != nil {
+	if err := createDirIfNeeded(snapshotFolder, t.DataDirPerm); err != nil {
 		return nil, err
 	}
 
@@ -69,7 +69,7 @@ func (t *implSerfConfigFactory) Object() (object interface{}, err error) {
 	conf.Init()
 
 	conf.NodeName = t.NodeService.NodeIdHex()
-	conf.SnapshotPath = snapshotPath
+	conf.SnapshotPath = filepath.Join(snapshotFolder, "local.snapshot")
 
 	conf.Tags["id"] = t.NodeService.NodeIdHex()
 	conf.Tags["role"] = t.Application.Name()
