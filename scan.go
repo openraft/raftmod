@@ -9,6 +9,8 @@ var Scan = []interface{}{
 	RaftLogStoreFactory(),
 	RaftStableStoreFactory(),
 	RaftSnapshotFactory(),
+	SerfConfigFactory(),
+	ServerLookup(),
 	RaftServer(),
 	RaftClientPool(),
 }

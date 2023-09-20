@@ -9,6 +9,8 @@ import (
 	"github.com/pkg/errors"
 	"net"
 	"os"
+	"strconv"
+	"strings"
 )
 
 type EmptyAddr struct {
@@ -20,6 +22,35 @@ func (t EmptyAddr) Network() string {
 
 func (t EmptyAddr) String() string {
 	return ""
+}
+
+func panicToError(err *error) {
+	if r := recover(); r != nil {
+		switch v := r.(type) {
+		case error:
+			*err = v
+		case string:
+			*err = errors.New(v)
+		default:
+			*err = errors.Errorf("%v", v)
+		}
+	}
+}
+
+func getPortNumber(addr string) (int, error) {
+	hostAndPort := strings.Split(addr, ":")
+	end := hostAndPort[len(hostAndPort)-1]
+	return strconv.Atoi(end)
+}
+
+func getHostAndPortNumber(addr string) (string, int, error) {
+	hostAndPort := strings.Split(addr, ":")
+	if len(hostAndPort) != 2 {
+		return "", 0, errors.Errorf("invalid address '%s'", addr)
+	}
+	sport := hostAndPort[len(hostAndPort)-1]
+	port, err := strconv.Atoi(sport)
+	return hostAndPort[0], port, err
 }
 
 func createDirIfNeeded(dir string, perm os.FileMode) error {
@@ -87,4 +118,26 @@ func isPrivateIP(ip net.IP) bool {
 	}
 
 	return false
+}
+
+func GetIP(addr net.Addr) []byte {
+	switch a := addr.(type) {
+	case *net.UDPAddr:
+		return []byte(a.IP.String())
+	case *net.TCPAddr:
+		return []byte(a.IP.String())
+	}
+	return []byte{}
+}
+
+func addLocalIP(addr string) string {
+	parts := strings.Split(addr, ":")
+	if parts[0] == "" {
+		ipAddr, err := LocalIP()
+		if err == nil {
+			parts[0] = ipAddr.String()
+			return strings.Join(parts, ":")
+		}
+	}
+	return addr
 }

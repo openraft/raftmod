@@ -38,18 +38,7 @@ func RaftSnapshotFactory() glue.FactoryBean {
 
 func (t *implRaftSnapshotFactory) Object() (object interface{}, err error) {
 
-	defer func() {
-		if r := recover(); r != nil {
-			switch v := r.(type) {
-			case error:
-				err = v
-			case string:
-				err = errors.New(v)
-			default:
-				err = errors.Errorf("%v", v)
-			}
-		}
-	}()
+	defer panicToError(&err)
 
 	dataDir := t.DataDir
 	if dataDir == "" {
