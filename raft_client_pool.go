@@ -26,7 +26,7 @@ import (
 type implRaftClientPool struct {
 
 	Properties      glue.Properties     `inject`
-	Log             *zap.Logger       `inject`
+	Log             *zap.Logger         `inject`
 
 	RaftAddress       string `value:"raft-server.listen-address,default="`
 	RPCBean           string `value:"raft-server.rpc-bean,default="`

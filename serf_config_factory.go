@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/serf/serf"
 	"github.com/pkg/errors"
 	"github.com/sprintframework/sprint"
+	"go.uber.org/zap"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -21,6 +22,7 @@ var SerfConfigClass = reflect.TypeOf((*serf.Config)(nil))
 
 type implSerfConfigFactory struct {
 
+	Log             *zap.Logger         `inject`
 	Properties      glue.Properties     `inject`
 
 	Application     sprint.Application  `inject`
@@ -71,6 +73,8 @@ func (t *implSerfConfigFactory) Object() (object interface{}, err error) {
 	conf.NodeName = t.NodeService.NodeIdHex()
 	conf.SnapshotPath = filepath.Join(snapshotFolder, "local.snapshot")
 
+	conf.Logger = zap.NewStdLog(t.Log.Named("serf"))
+	
 	conf.Tags["id"] = t.NodeService.NodeIdHex()
 	conf.Tags["role"] = t.Application.Name()
 	conf.Tags["version"] = t.Application.Version()
