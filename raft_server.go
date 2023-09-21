@@ -46,7 +46,7 @@ type implRaftServer struct {
 	SerfQueueSize     int          `value:"raft-server.serf-queue-size,default=2048"`
 
 	SerfConfig   *serf.Config `inject`
-	cluster      *serf.Serf
+	serf         *serf.Serf
 	serfListener net.Listener
 	serfChLAN    chan  serf.Event
 
@@ -129,7 +129,7 @@ func (t *implRaftServer) Bind() (err error) {
 	}
 
 	t.transport, err = newTCPTransport(t.listener, advertise, t.TlsConfig, func(stream raft.StreamLayer) *raft.NetworkTransport {
-		config := &raft.NetworkTransportConfig{Stream: stream, MaxPool: t.MaxPool, Timeout: t.Timeout, Logger: t.HCLog.Named("raft"),
+		config := &raft.NetworkTransportConfig{Stream: stream, MaxPool: t.MaxPool, Timeout: t.Timeout, Logger: t.HCLog.Named("raft-transport"),
 			ServerAddressProvider: t.ServerLookup}
 		return raft.NewNetworkTransportWithConfig(config)
 
@@ -147,11 +147,34 @@ func (t *implRaftServer) Active() bool {
 }
 
 func (t *implRaftServer) Transport() (raft.Transport, bool) {
-	return t.transport, t.running.Load()
+	if t.running.Load() {
+		// if we came to running, then transport was created
+		return t.transport, false
+	} else {
+		return nil, false
+	}
 }
 
 func (t *implRaftServer) Raft() (*raft.Raft, bool) {
-	return t.raft, t.running.Load()
+	if t.running.Load() {
+		// if we came to running, then raft was created
+		return t.raft, true
+	} else {
+		return nil, false
+	}
+}
+
+func (t *implRaftServer) Serf() (*serf.Serf, bool) {
+	if t.running.Load() {
+		// if we came to running, then serf was created
+		return t.serf, true
+	} else {
+		return nil, false
+	}
+}
+
+func (t *implRaftServer) IsLeader() bool {
+	return t.running.Load() && t.raft.State() == raft.Leader
 }
 
 func (t *implRaftServer) ListenAddress() net.Addr {
@@ -172,13 +195,14 @@ func (t *implRaftServer) Serve() (err error) {
 
 	config := raft.DefaultConfig()
 	config.LocalID = raft.ServerID(t.NodeService.NodeIdHex())
+	config.Logger = t.HCLog.Named("raft")
 
 	t.raft, err = raft.NewRaft(config, t.FSM, t.LogStore, t.StableStore, t.FileSnapshotStore, t.transport)
 	if err != nil {
 		return err
 	}
 
-	t.cluster, err = serf.Create(t.SerfConfig)
+	t.serf, err = serf.Create(t.SerfConfig)
 	if err != nil {
 		return err
 	}
@@ -190,8 +214,8 @@ func (t *implRaftServer) Serve() (err error) {
 func (t *implRaftServer) Stop() {
 	t.running.Store(false)
 	if t.running.CompareAndSwap(true, false) {
-		if t.cluster != nil {
-			t.cluster.Shutdown()
+		if t.serf != nil {
+			t.serf.Shutdown()
 		}
 		if t.raft != nil {
 			t.raft.Shutdown()
@@ -211,9 +235,5 @@ func (t *implRaftServer) Stop() {
 func (t *implRaftServer) Destroy() error {
 	t.Stop()
 	return nil
-}
-
-func (t *implRaftServer) IsLeader() bool {
-	return t.raft != nil && t.raft.State() == raft.Leader
 }
 
