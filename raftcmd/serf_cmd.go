@@ -22,8 +22,8 @@ type serfCommand struct {
 	// keep it sorted by SubCommand()
 	SerfCommands   []SerfCommand `inject`
 
-	SerfAddress   string    `value:"serf.addr,default=127.0.0.1:7373"`
-	SerfToken     string    `value:"serf.auth,default="`
+	SerfAddress   string    `value:"raft-server.serf-address,default=127.0.0.1:8800"`
+	SerfToken     string    `value:"raft-server.serf-auth,default="`
 
 }
 
@@ -95,7 +95,7 @@ func (t *serfCommand) Run(args []string) error {
 }
 
 func (t *serfCommand) doRun(handler SerfCommand, args []string) error {
-	config := client.Config{Addr: t.SerfAddress, AuthKey: t.SerfToken}
+	config := client.Config{Addr: t.getConnectAddress(t.SerfAddress), AuthKey: t.SerfToken}
 	client, err := client.ClientFromConfig(&config)
 	if err != nil {
 		return errors.Errorf("Error connecting to Serf agent: %s", err)
@@ -122,3 +122,12 @@ func (t *serfCommand) Synopsis() string {
 	return fmt.Sprintf("serf commands [%s]", t.subCommands())
 }
 
+func (t *serfCommand) getConnectAddress(listenAddr string) string {
+	if strings.HasPrefix(listenAddr, "0.0.0.0:") {
+		return "127.0.0.1" + listenAddr[7:]
+	}
+	if strings.HasPrefix(listenAddr, ":") {
+		return "127.0.0.1" + listenAddr
+	}
+	return listenAddr
+}
