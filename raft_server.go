@@ -17,7 +17,6 @@ import (
 	"go.uber.org/atomic"
 	"go.uber.org/zap"
 	"net"
-	"os"
 	"time"
 )
 
@@ -31,6 +30,7 @@ type implRaftServer struct {
 
 	Properties      glue.Properties     `inject`
 	Log             *zap.Logger         `inject`
+	HCLog           hclog.Logger        `inject`
 	TlsConfig       *tls.Config         `inject:"optional"`
 
 	Application     sprint.Application  `inject`
@@ -129,12 +129,7 @@ func (t *implRaftServer) Bind() (err error) {
 	}
 
 	t.transport, err = newTCPTransport(t.listener, advertise, t.TlsConfig, func(stream raft.StreamLayer) *raft.NetworkTransport {
-		logger := hclog.New(&hclog.LoggerOptions{
-			Name:   "raft-net",
-			Output: os.Stderr,
-			Level:  hclog.DefaultLevel,
-		})
-		config := &raft.NetworkTransportConfig{Stream: stream, MaxPool: t.MaxPool, Timeout: t.Timeout, Logger: logger,
+		config := &raft.NetworkTransportConfig{Stream: stream, MaxPool: t.MaxPool, Timeout: t.Timeout, Logger: t.HCLog.Named("raft"),
 			ServerAddressProvider: t.ServerLookup}
 		return raft.NewNetworkTransportWithConfig(config)
 
@@ -169,18 +164,7 @@ func (t *implRaftServer) ListenAddress() net.Addr {
 
 func (t *implRaftServer) Serve() (err error) {
 
-	defer func() {
-		if r := recover(); r != nil {
-			switch v := r.(type) {
-			case error:
-				err = v
-			case string:
-				err = errors.New(v)
-			default:
-				err = errors.Errorf("%v", v)
-			}
-		}
-	}()
+	panicToError(&err)
 
 	t.Log.Info("RaftServerServe", zap.String("addr", t.RaftAddress), zap.Bool("tls", t.TlsConfig != nil))
 
@@ -209,14 +193,14 @@ func (t *implRaftServer) Stop() {
 		if t.cluster != nil {
 			t.cluster.Shutdown()
 		}
-		if t.serfListener != nil {
-			t.serfListener.Close()
-		}
 		if t.raft != nil {
 			t.raft.Shutdown()
 		}
 		if t.transport != nil {
 			t.transport.Close()
+		}
+		if t.serfListener != nil {
+			t.serfListener.Close()
 		}
 		if t.listener != nil {
 			t.listener.Close()

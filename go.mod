@@ -6,13 +6,14 @@ require (
 	github.com/codeallergy/glue v1.1.0
 	github.com/dgraph-io/badger/v3 v3.2103.5
 	github.com/go-errors/errors v1.4.2
+	github.com/hashicorp/go-hclog v1.5.0
 	github.com/hashicorp/raft v1.5.0
 	github.com/hashicorp/serf v0.10.1
 	github.com/keyvalstore/store v1.3.0
 	github.com/openraft/raftapi v1.2.3
 	github.com/openraft/raftbadger v1.2.0
 	github.com/pkg/errors v0.9.1
-	github.com/sprintframework/sprint v1.3.1
+	github.com/sprintframework/sprint v1.3.5
 	github.com/stretchr/testify v1.8.2
 	go.uber.org/atomic v1.10.0
 	go.uber.org/zap v1.24.0
@@ -37,7 +38,6 @@ require (
 	github.com/google/flatbuffers v23.1.21+incompatible // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.2 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
-	github.com/hashicorp/go-hclog v1.5.0 // indirect
 	github.com/hashicorp/go-immutable-radix v1.0.0 // indirect
 	github.com/hashicorp/go-msgpack v0.5.5 // indirect
 	github.com/hashicorp/go-multierror v1.1.0 // indirect
