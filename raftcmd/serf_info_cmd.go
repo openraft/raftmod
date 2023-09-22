@@ -77,7 +77,9 @@ func (t serfInfoCommand) doRun(client *client.RPCClient, format string) error {
 	return nil
 }
 
-func statsString(s map[string]map[string]string) string {
+type statsString map[string]map[string]string
+
+func (s statsString) String() string {
 	var buf bytes.Buffer
 
 	// Get the keys in sorted order
@@ -108,7 +110,6 @@ func statsString(s map[string]map[string]string) string {
 	return buf.String()
 }
 
-
 func formatOutput(data interface{}, format string) ([]byte, error) {
 	var out string
 
@@ -122,7 +123,11 @@ func formatOutput(data interface{}, format string) ([]byte, error) {
 		out = string(jsonBin)
 
 	case "text":
-		out = data.(fmt.Stringer).String()
+		if s, ok := data.(fmt.Stringer); ok {
+			out = s.String()
+		} else {
+			out = fmt.Sprint(data)
+		}
 
 	default:
 		return nil, errors.Errorf("invalid output format \"%s\"", format)

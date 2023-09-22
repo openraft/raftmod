@@ -7,14 +7,15 @@ require (
 	github.com/dgraph-io/badger/v3 v3.2103.5
 	github.com/go-errors/errors v1.4.2
 	github.com/hashicorp/go-hclog v1.5.0
+	github.com/hashicorp/logutils v1.0.0
 	github.com/hashicorp/raft v1.5.0
 	github.com/hashicorp/serf v0.10.1
 	github.com/keyvalstore/store v1.3.0
-	github.com/openraft/raftapi v1.2.4
+	github.com/openraft/raftapi v1.2.5
 	github.com/openraft/raftbadger v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/ryanuber/columnize v0.0.0-20160712163229-9b3edd62028f
-	github.com/sprintframework/sprint v1.3.5
+	github.com/sprintframework/sprint v1.3.6
 	github.com/stretchr/testify v1.8.2
 	go.uber.org/atomic v1.10.0
 	go.uber.org/zap v1.24.0
@@ -48,7 +49,6 @@ require (
 	github.com/hashicorp/go-sockaddr v1.0.0 // indirect
 	github.com/hashicorp/go-syslog v1.0.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.1 // indirect
-	github.com/hashicorp/logutils v1.0.0 // indirect
 	github.com/hashicorp/mdns v1.0.4 // indirect
 	github.com/hashicorp/memberlist v0.5.0 // indirect
 	github.com/klauspost/compress v1.16.0 // indirect

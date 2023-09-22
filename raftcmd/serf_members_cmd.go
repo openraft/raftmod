@@ -147,7 +147,7 @@ func parseMembers(members []client.Member, detailed bool) MembersContainer {
 	return result
 }
 
-func (t MembersContainer) toString() string {
+func (t MembersContainer) String() string {
 	var result []string
 	for _, member := range t.Members {
 		tags := strings.Join(agent.MarshalTags(member.Tags), ",")

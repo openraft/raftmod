@@ -6,23 +6,13 @@
 package raftmod
 
 import (
+	"fmt"
 	"github.com/pkg/errors"
 	"net"
 	"os"
 	"strconv"
 	"strings"
 )
-
-type EmptyAddr struct {
-}
-
-func (t EmptyAddr) Network() string {
-	return ""
-}
-
-func (t EmptyAddr) String() string {
-	return ""
-}
 
 func panicToError(err *error) {
 	if r := recover(); r != nil {
@@ -37,20 +27,28 @@ func panicToError(err *error) {
 	}
 }
 
-func getPortNumber(addr string) (int, error) {
-	hostAndPort := strings.Split(addr, ":")
-	end := hostAndPort[len(hostAndPort)-1]
-	return strconv.Atoi(end)
+func getPortNumber(address string) (int, error) {
+	_, port, err := net.SplitHostPort(address)
+	if err != nil {
+		return 0, errors.Errorf("empty port in address '%s', %v", address, err)
+	}
+	portNum, err := strconv.Atoi(port)
+	if err != nil {
+		return 0, errors.Errorf("invalid port number in address '%s', %v", address, err)
+	}
+	return portNum, nil
 }
 
-func getHostAndPortNumber(addr string) (string, int, error) {
-	hostAndPort := strings.Split(addr, ":")
-	if len(hostAndPort) != 2 {
-		return "", 0, errors.Errorf("invalid address '%s'", addr)
+func getHostAndPortNumber(address string) (string, int, error) {
+	host, port, err := net.SplitHostPort(address)
+	if err != nil {
+		return "", 0, errors.Errorf("empty port in address '%s', %v", address, err)
 	}
-	sport := hostAndPort[len(hostAndPort)-1]
-	port, err := strconv.Atoi(sport)
-	return hostAndPort[0], port, err
+	portNum, err := strconv.Atoi(port)
+	if err != nil {
+		return "", 0, errors.Errorf("invalid port number in address '%s', %v", address, err)
+	}
+	return host, portNum, err
 }
 
 func createDirIfNeeded(dir string, perm os.FileMode) error {
@@ -66,8 +64,8 @@ func createDirIfNeeded(dir string, perm os.FileMode) error {
 }
 
 
-// LocalIP get the host machine local IP address
-func LocalIP() (net.IP, error) {
+// PrivateIP get the host machine private IP address
+func PrivateIP() (net.IP, error) {
 	ifaces, err := net.Interfaces()
 	if err != nil {
 		return nil, err
@@ -87,37 +85,14 @@ func LocalIP() (net.IP, error) {
 				ip = v.IP
 			}
 
-			if isPrivateIP(ip) {
+			if ip.IsPrivate() {
 				return ip, nil
 			}
+
 		}
 	}
 
 	return nil, errors.New("no IP")
-}
-
-func isPrivateIP(ip net.IP) bool {
-	var privateIPBlocks []*net.IPNet
-	for _, cidr := range []string{
-		// don't check loopback ips
-		//"127.0.0.0/8",    // IPv4 loopback
-		//"::1/128",        // IPv6 loopback
-		//"fe80::/10",      // IPv6 link-local
-		"10.0.0.0/8",     // RFC1918
-		"172.16.0.0/12",  // RFC1918
-		"192.168.0.0/16", // RFC1918
-	} {
-		_, block, _ := net.ParseCIDR(cidr)
-		privateIPBlocks = append(privateIPBlocks, block)
-	}
-
-	for _, block := range privateIPBlocks {
-		if block.Contains(ip) {
-			return true
-		}
-	}
-
-	return false
 }
 
 func GetIP(addr net.Addr) []byte {
@@ -133,7 +108,7 @@ func GetIP(addr net.Addr) []byte {
 func addLocalIP(addr string) string {
 	parts := strings.Split(addr, ":")
 	if parts[0] == "" {
-		ipAddr, err := LocalIP()
+		ipAddr, err := PrivateIP()
 		if err == nil {
 			parts[0] = ipAddr.String()
 			return strings.Join(parts, ":")
@@ -142,10 +117,10 @@ func addLocalIP(addr string) string {
 	return addr
 }
 
-func ReplaceToLanIP(addr string) string {
+func ReplaceToPrivateIP(addr string) string {
 	parts := strings.Split(addr, ":")
 	if parts[0] == "" || parts[0] == "0.0.0.0" || parts[0] == "127.0.0.1" {
-		ipAddr, err := LocalIP()
+		ipAddr, err := PrivateIP()
 		if err == nil {
 			parts[0] = ipAddr.String()
 			return strings.Join(parts, ":")
@@ -182,3 +157,24 @@ func AdjustPortNumber(port string, seq int) (string, error) {
 	return strconv.Itoa(portNum + seq), nil
 }
 
+func ParseTCPAddr(address string) (*net.TCPAddr, error) {
+
+	host, port, err := net.SplitHostPort(address)
+	if err != nil {
+		return nil, errors.Errorf("empty port in address '%s', %v", address, err)
+	}
+	if host == "" {
+		// empty host means all IPs
+		host = "0.0.0.0"
+	}
+
+	addr := fmt.Sprintf("%s:%s", host, port)
+
+	// Resolve the address
+	tcpAddr, err := net.ResolveTCPAddr("tcp", addr)
+	if err != nil {
+		return nil, errors.Errorf("invalid address '%s', %v", addr, err)
+	}
+
+	return tcpAddr, nil
+}

@@ -12,7 +12,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sprintframework/sprint"
 	"go.uber.org/zap"
-	"net"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -85,18 +84,9 @@ func (t *implSerfConfigFactory) Object() (object interface{}, err error) {
 		return nil, errors.New("required property 'serf-server.listen-address' is empty")
 	}
 
-	serfHost, serfPort, err := net.SplitHostPort(t.SerfAddress)
+	tcpAddr, err := ParseTCPAddr(t.SerfAddress)
 	if err != nil {
-		return nil, errors.Errorf("empty port in property 'serf-server.listen-address', %v", err)
-	}
-	if serfHost == "" {
-		serfHost = "0.0.0.0"
-	}
-	addr := fmt.Sprintf("%s:%s", serfHost, serfPort)
-
-	tcpAddr, err := net.ResolveTCPAddr("tcp", addr)
-	if err != nil {
-		return nil, errors.Errorf("invalid address '%s' in 'serf-server.listen-address', %v", addr, err)
+		return nil, errors.Errorf("issue in property 'serf-server.listen-address', %v", err)
 	}
 
 	memberConfig := conf.MemberlistConfig

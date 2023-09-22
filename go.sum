@@ -851,8 +851,8 @@ github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd/go.mod h1:6dJ
 github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742/go.mod h1:bx2lNnkwVCuqBIxFjflWJWanXIb3RllmbCylyMrvgv0=
 github.com/modern-go/reflect2 v1.0.1/go.mod h1:bx2lNnkwVCuqBIxFjflWJWanXIb3RllmbCylyMrvgv0=
 github.com/mwitkow/go-conntrack v0.0.0-20161129095857-cc309e4a2223/go.mod h1:qRWi+5nqEBWmkhHvq77mSJWrCKwh8bxhgT7d/eI7P4U=
-github.com/openraft/raftapi v1.2.4 h1:LjLnRDwQNoS3ftZXFFJoGGvYSj4SuWNkuJcAPUAPlMw=
-github.com/openraft/raftapi v1.2.4/go.mod h1:jNuvvpBzfSB89cxGSwam46BnA6M1oEe7VMV439Njaqg=
+github.com/openraft/raftapi v1.2.5 h1:wszb8CEcxNlbFroPB+qWHXr0VSw+C2wc5r+zFNe41uU=
+github.com/openraft/raftapi v1.2.5/go.mod h1:299NTUYYJlOmi8IiSbo+4N32l2lWhyqnRcrE00wiXz0=
 github.com/openraft/raftbadger v1.2.0 h1:D5e63IUoRfGlzn0aSw0rbV0nzZCS72zYCjT1Nf4R0Hc=
 github.com/openraft/raftbadger v1.2.0/go.mod h1:ZKqSvibUGibS1rj7YQbQbr0mHAdBzowo8SvWkmpnqOc=
 github.com/openraft/raftpb v1.2.0 h1:3qQ20PAAHJOuemdD9OtY31l4mWqJEywic6e7VA8b/iM=
@@ -917,8 +917,8 @@ github.com/spf13/jwalterweatherman v1.0.0/go.mod h1:cQK4TGJAtQXfYWX+Ddv3mKDzgVb6
 github.com/spf13/pflag v1.0.3/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnInEg4=
 github.com/spf13/viper v1.3.2/go.mod h1:ZiWeW+zYFKm7srdB9IoDzzZXaJaI5eL9QjNiN/DMA2s=
 github.com/sprintframework/sprint v1.3.1/go.mod h1:ssu7bTol76CG/yAEa2kDU990+4j3kNTCsGvowbIo6+I=
-github.com/sprintframework/sprint v1.3.5 h1:mwpizoRr/UH6fTidEl3BzBN38GML6Qp8XZoq43j6EdA=
-github.com/sprintframework/sprint v1.3.5/go.mod h1:xRk082IbIpbiPrqGdE2/V4Y/JkQMdQck4TIfr5Hzaug=
+github.com/sprintframework/sprint v1.3.6 h1:W6TvEO7a2TWU2aSeDeBYnR3hV5R83nTWpADKSQ8hLqU=
+github.com/sprintframework/sprint v1.3.6/go.mod h1:xRk082IbIpbiPrqGdE2/V4Y/JkQMdQck4TIfr5Hzaug=
 github.com/sprintframework/sprintpb v1.3.0 h1:QVdhSOprZWwgXhu9aBiNHBlnl42SflaU+MX5e24+yKo=
 github.com/sprintframework/sprintpb v1.3.0/go.mod h1:Cuk1DcfvNYTjWJ2xqutDZmRmhwN+FRrAYGkV5dT8mio=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

@@ -11,21 +11,16 @@ import (
 	"github.com/codeallergy/glue"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/raft"
-	"github.com/hashicorp/serf/serf"
 	"github.com/openraft/raftapi"
 	"github.com/pkg/errors"
 	"github.com/sprintframework/sprint"
 	"go.uber.org/atomic"
 	"go.uber.org/zap"
 	"net"
+	"sync"
 	"time"
 )
 
-const (
-	// reconcileChSize is the size of the buffered channel reconcile updates from Serf.
-	// If this is exhausted we will drop updates, and wait for a periodic reconcile.
-	reconcileChSize = 256
-)
 
 type implRaftServer struct {
 
@@ -46,14 +41,14 @@ type implRaftServer struct {
 	SerfAddress       string       `value:"serf-server.listen-address,default="`
 	SerfQueueSize     int          `value:"serf-server.queue-size,default=2048"`
 
-	SerfConfig   *serf.Config `inject`
-	serf         *serf.Serf
-	serfChLAN    chan  serf.Event
+	//SerfConfig   *serf.Config `inject`
+	//serf         *serf.Serf
+	//serfChLAN    chan  serf.Event
 
 	// reconcileCh is used to pass events from the serf handler
 	// into the leader manager, so that the strong state can be
 	// updated
-	reconcileCh chan serf.Member
+	// reconcileCh chan serf.Member
 
 	// should be defined by application
 	FSM      raft.FSM   `inject`
@@ -67,21 +62,21 @@ type implRaftServer struct {
 
 	raft      *raft.Raft
 
-	running   atomic.Bool
-	shutdownCh chan struct{}
+	alive        atomic.Bool
+	shutdownOnce sync.Once
+	shutdownCh   chan struct{}
 
 }
 
 func RaftServer() raftapi.RaftServer {
 	return &implRaftServer{
-		reconcileCh: make(chan serf.Member, reconcileChSize),
 		shutdownCh:  make(chan struct{}),
 	}
 }
 
 func (t *implRaftServer) PostConstruct() error {
-	t.serfChLAN = make(chan serf.Event, t.SerfQueueSize)
-	t.SerfConfig.EventCh = t.serfChLAN
+	//t.serfChLAN = make(chan serf.Event, t.SerfQueueSize)
+	//t.SerfConfig.EventCh = t.serfChLAN
 	return nil
 }
 
@@ -110,28 +105,18 @@ func (t *implRaftServer) Bind() (err error) {
 		return nil
 	}
 
-	raftHost, raftPort, err := net.SplitHostPort(t.RaftAddress)
+	raftAddr, err := ParseTCPAddr(t.RaftAddress)
 	if err != nil {
-		return errors.Errorf("empty port in property 'raft-server.listen-address', %v", err)
+		return errors.Errorf("issue in property 'raft-server.listen-address', %v", err)
 	}
-	if raftHost == "" {
-		raftHost = "0.0.0.0"
-	}
-	addr := fmt.Sprintf("%s:%s", raftHost, raftPort)
-
-	raftAddr, err := net.ResolveTCPAddr("tcp", addr)
-	if err != nil {
-		return errors.Errorf("invalid address '%s' in 'raft-server.listen-address', %v", addr, err)
-	}
-
-	t.RaftAddress = raftAddr.String()
+	t.RaftAddress = fmt.Sprintf("%s:%d", raftAddr.IP.String(), raftAddr.Port)
 
 	t.listener, err = net.Listen("tcp", t.RaftAddress)
 	if err != nil {
 		return errors.Errorf("bind failed on '%s', %v", t.RaftAddress, err)
 	}
 
-	advertise, err := net.ResolveTCPAddr("tcp", ReplaceToLanIP(t.RaftAddress))
+	advertise, err := net.ResolveTCPAddr("tcp", ReplaceToPrivateIP(t.RaftAddress))
 	if err != nil {
 		return errors.Errorf("tcp address resolve '%s', %v", t.listener.Addr().String(), err)
 	}
@@ -152,46 +137,27 @@ func (t *implRaftServer) Bind() (err error) {
 	return nil
 }
 
-func (t *implRaftServer) Active() bool {
-	return t.running.Load()
+func (t *implRaftServer) Alive() bool {
+	return t.alive.Load()
 }
 
 func (t *implRaftServer) Transport() (raft.Transport, bool) {
-	if t.running.Load() {
-		// if we came to running, then transport was created
-		return t.transport, false
-	} else {
-		return nil, false
-	}
+	return t.transport, t.transport != nil
 }
 
 func (t *implRaftServer) Raft() (*raft.Raft, bool) {
-	if t.running.Load() {
-		// if we came to running, then raft was created
-		return t.raft, true
-	} else {
-		return nil, false
-	}
-}
-
-func (t *implRaftServer) Serf() (*serf.Serf, bool) {
-	if t.running.Load() {
-		// if we came to running, then serf was created
-		return t.serf, true
-	} else {
-		return nil, false
-	}
+	return t.raft, t.raft != nil
 }
 
 func (t *implRaftServer) IsLeader() bool {
-	return t.running.Load() && t.raft.State() == raft.Leader
+	return t.alive.Load() && t.raft.State() == raft.Leader
 }
 
 func (t *implRaftServer) ListenAddress() net.Addr {
 	if t.listener != nil {
 		return t.listener.Addr()
 	} else {
-		return EmptyAddr{}
+		return sprint.EmptyAddr
 	}
 }
 
@@ -201,7 +167,7 @@ func (t *implRaftServer) Serve() (err error) {
 
 	t.Log.Info("RaftServerServe", zap.String("addr", t.RaftAddress), zap.Bool("tls", t.TlsConfig != nil))
 
-	t.running.Store(true)
+	t.alive.Store(true)
 
 	config := raft.DefaultConfig()
 	config.LocalID = raft.ServerID(t.NodeService.NodeIdHex())
@@ -212,6 +178,7 @@ func (t *implRaftServer) Serve() (err error) {
 		return err
 	}
 
+	/*
 	t.serf, err = serf.Create(t.SerfConfig)
 	if err != nil {
 		t.Log.Error("SerfCreate", zap.String("action", "shutdown raft"), zap.Error(err))
@@ -231,19 +198,33 @@ func (t *implRaftServer) Serve() (err error) {
 
 	serfAddr := fmt.Sprintf("%s:%d", t.SerfConfig.MemberlistConfig.BindAddr, t.SerfConfig.MemberlistConfig.BindPort)
 	t.Log.Info("SerfServerServe", zap.String("addr", serfAddr), zap.Any("stats", t.serf.Stats()))
+	 */
 
-	t.running.Store(true)
+	t.alive.Store(true)
 	return nil
 }
 
-func (t *implRaftServer) Stop() {
-	t.running.Store(false)
-	if t.running.CompareAndSwap(true, false) {
+func (t *implRaftServer) Shutdown() {
+	t.Log.Info("RaftServerShutdown", zap.String("addr", t.RaftAddress))
+
+	t.shutdownOnce.Do(func() {
+		/*
 		if t.serf != nil {
-			t.serf.Shutdown()
+			if err := t.serf.Leave(); err != nil {
+				t.Log.Error("SerfLeave", zap.Error(err))
+			}
+			if err := t.serf.Shutdown(); err != nil {
+				t.Log.Error("SerfShutdown", zap.Error(err))
+			}
 		}
+		 */
 		if t.raft != nil {
-			t.raft.Shutdown()
+			future := t.raft.Shutdown()
+			go func() {
+				if err := future.Error(); err != nil {
+					t.Log.Error("RaftShutdown", zap.Error(err))
+				}
+			}()
 		}
 		if t.transport != nil {
 			t.transport.Close()
@@ -251,11 +232,16 @@ func (t *implRaftServer) Stop() {
 		if t.listener != nil {
 			t.listener.Close()
 		}
-	}
+		close(t.shutdownCh)
+	})
+}
+
+func (t *implRaftServer) ShutdownCh() <-chan struct{} {
+	return t.shutdownCh
 }
 
 func (t *implRaftServer) Destroy() error {
-	t.Stop()
+	t.Shutdown()
 	return nil
 }
 

@@ -11,6 +11,7 @@ var Scan = []interface{}{
 	RaftSnapshotFactory(),
 	SerfConfigFactory(),
 	ServerLookup(),
+	SerfRPCServer(),
 	RaftServer(),
 	RaftClientPool(),
 }

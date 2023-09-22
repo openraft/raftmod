@@ -17,34 +17,41 @@ const (
 	StatusReap = serf.MemberStatus(-1)
 )
 
+// Serf event handler
+func (t *implRaftServer) HandleEvent(e serf.Event) {
+	switch e.EventType() {
+	case serf.EventMemberJoin:
+		t.nodeJoinLAN(e.(serf.MemberEvent))
+		t.localMemberEvent(e.(serf.MemberEvent))
+
+	case serf.EventMemberLeave, serf.EventMemberFailed, serf.EventMemberReap:
+		t.nodeFailedLAN(e.(serf.MemberEvent))
+		t.localMemberEvent(e.(serf.MemberEvent))
+
+	case serf.EventUser:
+		t.localEvent(e.(serf.UserEvent))
+	case serf.EventMemberUpdate:
+		t.nodeUpdateLAN(e.(serf.MemberEvent))
+		t.localMemberEvent(e.(serf.MemberEvent))
+	case serf.EventQuery: // Ignore
+	default:
+		t.Log.Warn("UnknownSerfEvent", zap.String("network", "LAN"), zap.Any("event", e))
+	}
+}
+
+/*
 func (t *implRaftServer) eventHandlerLAN() {
 	for {
 		select {
 		case e := <-t.serfChLAN:
-			switch e.EventType() {
-			case serf.EventMemberJoin:
-				t.nodeJoinLAN(e.(serf.MemberEvent))
-				t.localMemberEvent(e.(serf.MemberEvent))
-
-			case serf.EventMemberLeave, serf.EventMemberFailed, serf.EventMemberReap:
-				t.nodeFailedLAN(e.(serf.MemberEvent))
-				t.localMemberEvent(e.(serf.MemberEvent))
-
-			case serf.EventUser:
-				t.localEvent(e.(serf.UserEvent))
-			case serf.EventMemberUpdate:
-				t.nodeUpdateLAN(e.(serf.MemberEvent))
-				t.localMemberEvent(e.(serf.MemberEvent))
-			case serf.EventQuery: // Ignore
-			default:
-				t.Log.Warn("UnknownSerfEvent", zap.String("network", "LAN"), zap.Any("event", e))
-			}
+			t.HandleEvent(e)
 
 		case <-t.shutdownCh:
 			return
 		}
 	}
 }
+*/
 
 func (t *implRaftServer) nodeJoinLAN(me serf.MemberEvent) {
 	for _, m := range me.Members {
@@ -112,6 +119,8 @@ func (t *implRaftServer) localMemberEvent(me serf.MemberEvent) {
 }
 
 func (t *implRaftServer) localEvent(event serf.UserEvent) {
+
+	t.Log.Info("UserEvent", zap.String("event", event.Name), zap.String("payload", string(event.Payload)))
 
 	prefix := t.Application.Name() + ":"
 	if !strings.HasPrefix(event.Name,  prefix) {

@@ -14,7 +14,7 @@ import (
 
 func TestLocalIP(t *testing.T) {
 
-	ip, err := raftmod.LocalIP()
+	ip, err := raftmod.PrivateIP()
 	require.NoError(t, err)
 
 	fmt.Printf("ip=%v\n", ip)
