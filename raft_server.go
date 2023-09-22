@@ -204,12 +204,13 @@ func (t *implRaftServer) Serve() (err error) {
 	return nil
 }
 
-func (t *implRaftServer) Shutdown() {
+func (t *implRaftServer) Shutdown() error {
 	t.alive.Store(false)
 
 	t.shutdownOnce.Do(func() {
 
 		t.Log.Info("RaftServerShutdown", zap.String("addr", t.RaftAddress))
+		close(t.shutdownCh)
 		/*
 		if t.serf != nil {
 			if err := t.serf.Leave(); err != nil {
@@ -220,6 +221,7 @@ func (t *implRaftServer) Shutdown() {
 			}
 		}
 		 */
+
 		if t.raft != nil {
 			future := t.raft.Shutdown()
 			go func() {
@@ -234,8 +236,9 @@ func (t *implRaftServer) Shutdown() {
 		if t.listener != nil {
 			t.listener.Close()
 		}
-		close(t.shutdownCh)
 	})
+
+	return nil
 }
 
 func (t *implRaftServer) ShutdownCh() <-chan struct{} {

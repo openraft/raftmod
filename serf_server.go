@@ -130,12 +130,13 @@ func (t *implSerfServer) Serve() (err error) {
 	return nil
 }
 
-func (t *implSerfServer) Shutdown() {
+func (t *implSerfServer) Shutdown() (err error) {
 	t.alive.Store(false)
 
 	t.shutdownOnce.Do(func() {
 
 		t.Log.Info("SerfServerShutdown", zap.String("addr", t.RPCAddress))
+		close(t.shutdownCh)
 
 		if t.ipc != nil {
 			t.ipc.Shutdown()
@@ -146,14 +147,15 @@ func (t *implSerfServer) Shutdown() {
 				t.Log.Error("SerfLeave", zap.Error(err))
 			}
 
-			t.serfAgent.Shutdown()
+			err = t.serfAgent.Shutdown()
 		}
 		if t.listener != nil {
 			t.listener.Close()
 		}
-		close(t.shutdownCh)
+
 	})
 
+	return
 }
 
 func (t *implSerfServer) Config() (*serf.Config, bool) {

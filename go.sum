@@ -912,12 +912,12 @@ github.com/spf13/pflag v1.0.3/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnIn
 github.com/spf13/viper v1.3.2/go.mod h1:ZiWeW+zYFKm7srdB9IoDzzZXaJaI5eL9QjNiN/DMA2s=
 github.com/sprintframework/raft-badger v1.2.2 h1:PXpzkjgdAf370ZyL5vnOJGMMpWb68dmwHWAeGvdlGY0=
 github.com/sprintframework/raft-badger v1.2.2/go.mod h1:czCG3yyEniwUi4RnJBGzyB9dZ38XaA4rEPGHAQo2RWI=
-github.com/sprintframework/raftapi v1.2.10 h1:/8qtvPDfaai+LBSmHS1Bgje4Qe9tvrESjT6+IGuJvlQ=
-github.com/sprintframework/raftapi v1.2.10/go.mod h1:be+cOg5krFiW3Vcj/oFBPQH9VuDNu7+VK6Tqo0UK+GM=
+github.com/sprintframework/raftapi v1.2.11 h1:EGOCZRwmr5jjz/3GcH1GnV/veljPadWAC2FO8XkLDMo=
+github.com/sprintframework/raftapi v1.2.11/go.mod h1:qx8AaLods0d6lCgaL0XJE8vQRWMkD5oEtYaa/2lMaC8=
 github.com/sprintframework/raftpb v1.2.10 h1:OdTGZTbLXfWZr40bj2eCTHhXH0dnvGIaqghCxRxAlP0=
 github.com/sprintframework/raftpb v1.2.10/go.mod h1:VgSWHBgozCJb0coqERTz+vIUxgQBNVR/UjrDdYCohu0=
-github.com/sprintframework/sprint v1.3.7 h1:0rZz5bfqOve0lgSilvYoatHV+1iFrDbNkNjVxLYtMKE=
-github.com/sprintframework/sprint v1.3.7/go.mod h1:xRk082IbIpbiPrqGdE2/V4Y/JkQMdQck4TIfr5Hzaug=
+github.com/sprintframework/sprint v1.3.8 h1:xt/Ie7KXHRPjA6FuqNZf1DrW9zEzIAXSnCQDtF7GIoU=
+github.com/sprintframework/sprint v1.3.8/go.mod h1:xRk082IbIpbiPrqGdE2/V4Y/JkQMdQck4TIfr5Hzaug=
 github.com/sprintframework/sprintpb v1.3.0 h1:QVdhSOprZWwgXhu9aBiNHBlnl42SflaU+MX5e24+yKo=
 github.com/sprintframework/sprintpb v1.3.0/go.mod h1:Cuk1DcfvNYTjWJ2xqutDZmRmhwN+FRrAYGkV5dT8mio=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
