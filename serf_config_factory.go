@@ -54,7 +54,7 @@ func (t *implSerfConfigFactory) Object() (object interface{}, err error) {
 			return nil, err
 		}
 
-		dataDir = filepath.Join(dataDir, t.NodeService.NodeName())
+		dataDir = filepath.Join(dataDir, t.NodeService.LocalName())
 	}
 
 	if err := createDirIfNeeded(dataDir, t.DataDirPerm); err != nil {
@@ -70,7 +70,7 @@ func (t *implSerfConfigFactory) Object() (object interface{}, err error) {
 	conf := serf.DefaultConfig()
 	conf.Init()
 
-	conf.NodeName = t.NodeService.NodeName()
+	conf.NodeName = t.NodeService.LANName()
 	conf.SnapshotPath = filepath.Join(snapshotFolder, "local.snapshot")
 
 	conf.Logger = zap.NewStdLog(t.Log.Named("serf"))

@@ -15,7 +15,7 @@ require (
 	github.com/openraft/raftbadger v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/ryanuber/columnize v0.0.0-20160712163229-9b3edd62028f
-	github.com/sprintframework/sprint v1.3.6
+	github.com/sprintframework/sprint v1.3.7
 	github.com/stretchr/testify v1.8.2
 	go.uber.org/atomic v1.10.0
 	go.uber.org/zap v1.24.0
