@@ -10,6 +10,7 @@ import (
 	"github.com/codeallergy/glue"
 	"github.com/hashicorp/serf/client"
 	"github.com/pkg/errors"
+	"github.com/ryanuber/columnize"
 	"github.com/sprintframework/sprint"
 	"sort"
 	"strings"
@@ -68,12 +69,13 @@ Commands:
 
 %s
 `
-	var sb strings.Builder
+	var lines []string
 	for _, cmd := range t.SerfCommands {
-		sb.WriteString(fmt.Sprintf("    %s           %s\n", cmd.SubCommand(), cmd.Synopsis()))
+		lines = append(lines, fmt.Sprintf("    %s           %s\n", cmd.SubCommand(), cmd.Synopsis()))
 	}
+	commands := columnize.SimpleFormat(lines)
 
-	return strings.TrimSpace(fmt.Sprintf(helpText, t.Application.Executable(), sb.String()))
+	return strings.TrimSpace(fmt.Sprintf(helpText, t.Application.Executable(), commands))
 }
 
 func (t *serfCommand) Run(args []string) error {
@@ -95,13 +97,18 @@ func (t *serfCommand) Run(args []string) error {
 }
 
 func (t *serfCommand) doRun(handler SerfCommand, args []string) error {
-	config := client.Config{Addr: t.getConnectAddress(t.SerfAddress), AuthKey: t.SerfToken}
+	addr := t.getConnectAddress(t.SerfAddress)
+	config := client.Config{Addr: addr, AuthKey: t.SerfToken}
 	client, err := client.ClientFromConfig(&config)
 	if err != nil {
 		return errors.Errorf("Error connecting to Serf agent: %s", err)
 	}
 	defer client.Close()
-	return handler.Run(client, args)
+	err = handler.Run(client, args)
+	if err != nil {
+		return errors.Errorf("serf connect '%s', %v", addr, err)
+	}
+	return nil
 }
 
 func (t *serfCommand) subCommands() string {

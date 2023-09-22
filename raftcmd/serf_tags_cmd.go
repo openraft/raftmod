@@ -37,7 +37,7 @@ Options:
 }
 
 func (t serfTagsCommand) SubCommand() string {
-	return "event"
+	return "tags"
 }
 
 func (t serfTagsCommand) Synopsis() string {
