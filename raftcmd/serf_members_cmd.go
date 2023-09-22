@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/serf/cmd/serf/command/agent"
 	"github.com/ryanuber/columnize"
 	"net"
+	"sort"
 	"strings"
 )
 
@@ -150,7 +151,9 @@ func parseMembers(members []client.Member, detailed bool) MembersContainer {
 func (t MembersContainer) String() string {
 	var result []string
 	for _, member := range t.Members {
-		tags := strings.Join(agent.MarshalTags(member.Tags), ",")
+		listOfTags := agent.MarshalTags(member.Tags)
+		sort.Strings(listOfTags)
+		tags := strings.Join(listOfTags, ",")
 		line := fmt.Sprintf("%s|%s|%s|%s",
 			member.Name, member.Addr, member.Status, tags)
 		if member.detail {

@@ -27,6 +27,7 @@ type implSerfServer struct {
 	Log             *zap.Logger         `inject`
 	HCLog           hclog.Logger        `inject`
 	TlsConfig       *tls.Config         `inject:"optional"`
+	NodeService     sprint.NodeService  `inject`
 
 	SerfConfig      *serf.Config        `inject`
 	agentConfig     *agent.Config
@@ -83,7 +84,7 @@ func (t *implSerfServer) GetStats(cb func(name, value string) bool) error {
 
 func (t *implSerfServer) Bind() error {
 
-	tcpAddr, err := ParseTCPAddr(t.agentConfig.RPCAddr)
+	tcpAddr, err := ParseAndAdjustTCPAddr(t.agentConfig.RPCAddr, t.NodeService.NodeSeq())
 	if err != nil {
 		return err
 	}

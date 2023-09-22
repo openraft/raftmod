@@ -84,7 +84,7 @@ func (t *implSerfConfigFactory) Object() (object interface{}, err error) {
 		return nil, errors.New("required property 'serf-server.listen-address' is empty")
 	}
 
-	tcpAddr, err := ParseTCPAddr(t.SerfAddress)
+	tcpAddr, err := ParseAndAdjustTCPAddr(t.SerfAddress, t.NodeService.NodeSeq())
 	if err != nil {
 		return nil, errors.Errorf("issue in property 'serf-server.listen-address', %v", err)
 	}

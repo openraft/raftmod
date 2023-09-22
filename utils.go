@@ -129,35 +129,7 @@ func ReplaceToPrivateIP(addr string) string {
 	return addr
 }
 
-func AdjustPortNumberInAddress(addr string, seq int) (result string, err error) {
-	if seq == 0 {
-		return addr, nil
-	}
-	parts := strings.Split(addr, ":")
-	if len(parts) > 0 {
-		lastIndex := len(parts)-1
-		parts[lastIndex], err = AdjustPortNumber(parts[lastIndex], seq)
-		if err != nil {
-			return
-		}
-		return strings.Join(parts, ":"), nil
-	}
-	return addr, nil
-}
-
-func AdjustPortNumber(port string, seq int) (string, error) {
-	portNum, err := strconv.Atoi(port)
-	if err != nil {
-		return "", errors.Errorf("invalid port number string '%s', %v", port, err)
-	}
-	if portNum == 0 {
-		// do not adjust zero port number, because it is the any one
-		return port, nil
-	}
-	return strconv.Itoa(portNum + seq), nil
-}
-
-func ParseTCPAddr(address string) (*net.TCPAddr, error) {
+func ParseAndAdjustTCPAddr(address string, seq int) (*net.TCPAddr, error) {
 
 	host, port, err := net.SplitHostPort(address)
 	if err != nil {
@@ -176,5 +148,8 @@ func ParseTCPAddr(address string) (*net.TCPAddr, error) {
 		return nil, errors.Errorf("invalid address '%s', %v", addr, err)
 	}
 
+	tcpAddr.Port += seq
+
 	return tcpAddr, nil
+
 }

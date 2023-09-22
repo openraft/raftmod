@@ -104,14 +104,17 @@ func (t *serfCommand) Run(args []string) error {
 
 func (t *serfCommand) doRun(handler SerfCommand, args []string) (err error) {
 	addr := t.getConnectAddress(t.SerfAddress)
-	addr, err = raftmod.AdjustPortNumberInAddress(addr, t.ApplicationFlags.Node())
+
+	tcpAddr, err := raftmod.ParseAndAdjustTCPAddr(addr, t.ApplicationFlags.Node())
 	if err != nil {
 		return err
 	}
+	addr = fmt.Sprintf("%s:%d", tcpAddr.IP.String(), tcpAddr.Port)
+
 	prov := clientProviderImpl{Addr: addr, AuthKey: t.SerfToken}
 	err = handler.Run(prov, args)
 	if err != nil {
-		return errors.Errorf("serf client '%s', %v", addr, err)
+		return errors.Errorf("connect self client '%s', %v", addr, err)
 	}
 	return nil
 }

@@ -105,7 +105,7 @@ func (t *implRaftServer) Bind() (err error) {
 		return nil
 	}
 
-	raftAddr, err := ParseTCPAddr(t.RaftAddress)
+	raftAddr, err := ParseAndAdjustTCPAddr(t.RaftAddress, t.NodeService.NodeSeq())
 	if err != nil {
 		return errors.Errorf("issue in property 'raft-server.listen-address', %v", err)
 	}
