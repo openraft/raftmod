@@ -167,7 +167,7 @@ func (t *implRaftServer) Serve() (err error) {
 
 	t.Log.Info("RaftServerServe", zap.String("addr", t.RaftAddress), zap.Bool("tls", t.TlsConfig != nil))
 
-	t.alive.Store(true)
+	t.alive.Store(false)
 
 	config := raft.DefaultConfig()
 	config.LocalID = raft.ServerID(t.NodeService.NodeIdHex())
@@ -205,9 +205,11 @@ func (t *implRaftServer) Serve() (err error) {
 }
 
 func (t *implRaftServer) Shutdown() {
-	t.Log.Info("RaftServerShutdown", zap.String("addr", t.RaftAddress))
+	t.alive.Store(false)
 
 	t.shutdownOnce.Do(func() {
+
+		t.Log.Info("RaftServerShutdown", zap.String("addr", t.RaftAddress))
 		/*
 		if t.serf != nil {
 			if err := t.serf.Leave(); err != nil {

@@ -133,10 +133,18 @@ func (t *implSerfServer) Shutdown() {
 	t.alive.Store(false)
 
 	t.shutdownOnce.Do(func() {
+
+		t.Log.Info("SerfServerShutdown", zap.String("addr", t.RPCAddress))
+
 		if t.ipc != nil {
 			t.ipc.Shutdown()
 		}
 		if t.serfAgent != nil {
+
+			if err := t.serfAgent.Serf().Leave(); err != nil {
+				t.Log.Error("SerfLeave", zap.Error(err))
+			}
+
 			t.serfAgent.Shutdown()
 		}
 		if t.listener != nil {
