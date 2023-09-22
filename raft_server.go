@@ -7,6 +7,7 @@ package raftmod
 
 import (
 	"crypto/tls"
+	"fmt"
 	"github.com/codeallergy/glue"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/raft"
@@ -42,12 +43,11 @@ type implRaftServer struct {
 
 	ServerLookup       raftapi.ServerLookup  `inject`
 
-	SerfAddress       string       `value:"raft-server.serf-address,default="`
-	SerfQueueSize     int          `value:"raft-server.serf-queue-size,default=2048"`
+	SerfAddress       string       `value:"serf-server.listen-address,default="`
+	SerfQueueSize     int          `value:"serf-server.queue-size,default=2048"`
 
 	SerfConfig   *serf.Config `inject`
 	serf         *serf.Serf
-	serfListener net.Listener
 	serfChLAN    chan  serf.Event
 
 	// reconcileCh is used to pass events from the serf handler
@@ -110,23 +110,33 @@ func (t *implRaftServer) Bind() (err error) {
 		return nil
 	}
 
-	t.RaftAddress = addLocalIP(t.RaftAddress)
-	t.SerfAddress = addLocalIP(t.SerfAddress)
+	raftHost, raftPort, err := net.SplitHostPort(t.RaftAddress)
+	if err != nil {
+		return errors.Errorf("empty port in property 'raft-server.listen-address', %v", err)
+	}
+	if raftHost == "" {
+		raftHost = "0.0.0.0"
+	}
+	addr := fmt.Sprintf("%s:%s", raftHost, raftPort)
+
+	raftAddr, err := net.ResolveTCPAddr("tcp", addr)
+	if err != nil {
+		return errors.Errorf("invalid address '%s' in 'raft-server.listen-address', %v", addr, err)
+	}
+
+	t.RaftAddress = raftAddr.String()
 
 	t.listener, err = net.Listen("tcp", t.RaftAddress)
 	if err != nil {
 		return errors.Errorf("bind failed on '%s', %v", t.RaftAddress, err)
 	}
 
-	t.serfListener, err = net.Listen("tcp", t.SerfAddress)
-	if err != nil {
-		return errors.Errorf("bind failed on '%s', %v", t.SerfAddress, err)
-	}
-
-	advertise, err := net.ResolveTCPAddr("tcp", t.listener.Addr().String())
+	advertise, err := net.ResolveTCPAddr("tcp", ReplaceToLanIP(t.RaftAddress))
 	if err != nil {
 		return errors.Errorf("tcp address resolve '%s', %v", t.listener.Addr().String(), err)
 	}
+
+	t.Log.Info("RaftServerFactory", zap.String("bind", t.listener.Addr().String()), zap.String("advertise", advertise.String()))
 
 	t.transport, err = newTCPTransport(t.listener, advertise, t.TlsConfig, func(stream raft.StreamLayer) *raft.NetworkTransport {
 		config := &raft.NetworkTransportConfig{Stream: stream, MaxPool: t.MaxPool, Timeout: t.Timeout, Logger: t.HCLog.Named("raft-transport"),
@@ -204,8 +214,23 @@ func (t *implRaftServer) Serve() (err error) {
 
 	t.serf, err = serf.Create(t.SerfConfig)
 	if err != nil {
+		t.Log.Error("SerfCreate", zap.String("action", "shutdown raft"), zap.Error(err))
+		t.raft.Shutdown()
 		return err
 	}
+
+	for _, m := range t.serf.Members() {
+		t.Log.Info("Member", zap.Any("member", m))
+		server, err := ParseServerTags(m, t.Application.Name())
+		if err != nil {
+			t.Log.Debug("ParseServerTags", zap.Any("member", m), zap.Error(err))
+			continue
+		}
+		t.ServerLookup.AddServer(server)
+	}
+
+	serfAddr := fmt.Sprintf("%s:%d", t.SerfConfig.MemberlistConfig.BindAddr, t.SerfConfig.MemberlistConfig.BindPort)
+	t.Log.Info("SerfServerServe", zap.String("addr", serfAddr), zap.Any("stats", t.serf.Stats()))
 
 	t.running.Store(true)
 	return nil
@@ -222,9 +247,6 @@ func (t *implRaftServer) Stop() {
 		}
 		if t.transport != nil {
 			t.transport.Close()
-		}
-		if t.serfListener != nil {
-			t.serfListener.Close()
 		}
 		if t.listener != nil {
 			t.listener.Close()

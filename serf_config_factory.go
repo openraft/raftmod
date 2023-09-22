@@ -12,6 +12,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sprintframework/sprint"
 	"go.uber.org/zap"
+	"net"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -28,7 +29,7 @@ type implSerfConfigFactory struct {
 	Application     sprint.Application  `inject`
 	NodeService     sprint.NodeService  `inject`
 
-	SerfAddress  string            `value:"raft-server.serf-address,default="`
+	SerfAddress  string            `value:"serf-server.listen-address,default="`
 	RaftAddress  string            `value:"raft-server.listen-address,default="`
 	RPCBean      string            `value:"raft-server.rpc-bean,default="`
 
@@ -54,7 +55,7 @@ func (t *implSerfConfigFactory) Object() (object interface{}, err error) {
 			return nil, err
 		}
 
-		dataDir = filepath.Join(dataDir, t.Application.Name())
+		dataDir = filepath.Join(dataDir, t.NodeService.NodeName())
 	}
 
 	if err := createDirIfNeeded(dataDir, t.DataDirPerm); err != nil {
@@ -70,7 +71,7 @@ func (t *implSerfConfigFactory) Object() (object interface{}, err error) {
 	conf := serf.DefaultConfig()
 	conf.Init()
 
-	conf.NodeName = t.NodeService.NodeIdHex()
+	conf.NodeName = t.NodeService.NodeName()
 	conf.SnapshotPath = filepath.Join(snapshotFolder, "local.snapshot")
 
 	conf.Logger = zap.NewStdLog(t.Log.Named("serf"))
@@ -81,24 +82,29 @@ func (t *implSerfConfigFactory) Object() (object interface{}, err error) {
 	conf.Tags["build"] = t.Application.Build()
 
 	if t.SerfAddress == "" {
-		return nil, errors.New("required property 'raft-server.serf-address' is empty")
+		return nil, errors.New("required property 'serf-server.listen-address' is empty")
 	}
 
-	serfHost, serfPort, err := getHostAndPortNumber(t.SerfAddress)
+	serfHost, serfPort, err := net.SplitHostPort(t.SerfAddress)
 	if err != nil {
-		return nil, errors.Errorf("invalid port in property 'raft-server.serf-address', %v", err)
+		return nil, errors.Errorf("empty port in property 'serf-server.listen-address', %v", err)
 	}
 	if serfHost == "" {
 		serfHost = "0.0.0.0"
 	}
+	addr := fmt.Sprintf("%s:%s", serfHost, serfPort)
+
+	tcpAddr, err := net.ResolveTCPAddr("tcp", addr)
+	if err != nil {
+		return nil, errors.Errorf("invalid address '%s' in 'serf-server.listen-address', %v", addr, err)
+	}
 
 	memberConfig := conf.MemberlistConfig
 
-	memberConfig.BindAddr = serfHost
-	memberConfig.BindPort = serfPort
-	memberConfig.AdvertisePort = serfPort
+	memberConfig.BindAddr = tcpAddr.IP.String()
+	memberConfig.BindPort = tcpAddr.Port
 
-	conf.Tags["port"] = strconv.Itoa(serfPort)
+	conf.Tags["port"] = strconv.Itoa(tcpAddr.Port)
 
 	if t.RaftAddress != "" {
 		raftPort, err := getPortNumber(t.RaftAddress)

@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"github.com/codeallergy/glue"
 	"github.com/hashicorp/serf/client"
+	"github.com/openraft/raftmod"
 	"github.com/pkg/errors"
 	"github.com/ryanuber/columnize"
 	"github.com/sprintframework/sprint"
@@ -17,14 +18,15 @@ import (
 )
 
 type serfCommand struct {
-	Application  sprint.Application   `inject`
-	Context      glue.Context         `inject`
+	Application       sprint.Application        `inject`
+	ApplicationFlags  sprint.ApplicationFlags   `inject`
+	Context           glue.Context              `inject`
 
 	// keep it sorted by SubCommand()
 	SerfCommands   []SerfCommand `inject`
 
-	SerfAddress   string    `value:"raft-server.serf-address,default=127.0.0.1:8800"`
-	SerfToken     string    `value:"raft-server.serf-auth,default="`
+	SerfAddress   string    `value:"serf-server.rpc-address,default=127.0.0.1:8700"`
+	SerfToken     string    `value:"serf-server.rpc-auth,default="`
 
 }
 
@@ -100,10 +102,14 @@ func (t *serfCommand) Run(args []string) error {
 	}
 }
 
-func (t *serfCommand) doRun(handler SerfCommand, args []string) error {
+func (t *serfCommand) doRun(handler SerfCommand, args []string) (err error) {
 	addr := t.getConnectAddress(t.SerfAddress)
+	addr, err = raftmod.AdjustPortNumberInAddress(addr, t.ApplicationFlags.Node())
+	if err != nil {
+		return err
+	}
 	prov := clientProviderImpl{Addr: addr, AuthKey: t.SerfToken}
-	err := handler.Run(prov, args)
+	err = handler.Run(prov, args)
 	if err != nil {
 		return errors.Errorf("serf client '%s', %v", addr, err)
 	}
