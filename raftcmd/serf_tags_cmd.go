@@ -44,7 +44,7 @@ func (t serfTagsCommand) Synopsis() string {
 	return "Modify tags of a running Serf agent"
 }
 
-func (t serfTagsCommand) Run(client *client.RPCClient, args []string) error {
+func (t serfTagsCommand) Run(prov ClientProvider, args []string) error {
 	var tagPairs []string
 	var delTags []string
 	cmdFlags := flag.NewFlagSet("tags", flag.ContinueOnError)
@@ -68,9 +68,13 @@ func (t serfTagsCommand) Run(client *client.RPCClient, args []string) error {
 		return err
 	}
 
-	if err := client.UpdateTags(tags, delTags); err != nil {
+	err = prov.DoWithClient(func(cli *client.RPCClient) error {
+		return cli.UpdateTags(tags, delTags)
+	})
+	if err != nil {
 		return errors.Errorf("setting tags '%s', %v", tags, err)
 	}
+
 
 	println("Successfully updated agent tags")
 	return nil

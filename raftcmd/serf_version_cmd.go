@@ -7,7 +7,6 @@ package raftcmd
 
 import (
 	"fmt"
-	"github.com/hashicorp/serf/client"
 	"github.com/hashicorp/serf/serf"
 	"github.com/hashicorp/serf/version"
 	"github.com/sprintframework/sprint"
@@ -40,7 +39,7 @@ func (t serfVersionCommand) Synopsis() string {
 	return "Prints the Serf version"
 }
 
-func (t serfVersionCommand) Run(client *client.RPCClient, args []string) error {
+func (t serfVersionCommand) Run(_ ClientProvider, args []string) error {
 	println(version.GetHumanVersion())
 	fmt.Printf("Agent Protocol: %d (Understands back to: %d)\n",
 		serf.ProtocolVersionMax, serf.ProtocolVersionMin)

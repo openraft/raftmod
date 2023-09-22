@@ -44,7 +44,13 @@ func (t serfRttCommand) Synopsis() string {
 	return "Estimates network round trip time between nodes"
 }
 
-func (t serfRttCommand) Run(client *client.RPCClient, args []string) error {
+func (t serfRttCommand) Run(prov ClientProvider, args []string) error {
+	return prov.DoWithClient(func(cli *client.RPCClient) error {
+		return t.doRun(cli, args)
+	})
+}
+
+func (t serfRttCommand) doRun(client *client.RPCClient, args []string) error {
 
 	nodes := args
 

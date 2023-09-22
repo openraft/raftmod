@@ -42,7 +42,7 @@ func (t serfJoinCommand) Synopsis() string {
 	return "Tell Serf agent to join cluster"
 }
 
-func (t serfJoinCommand) Run(client *client.RPCClient, args []string) error {
+func (t serfJoinCommand) Run(prov ClientProvider, args []string) error {
 	var replayEvents bool
 
 	cmdFlags := flag.NewFlagSet("join", flag.ContinueOnError)
@@ -53,14 +53,21 @@ func (t serfJoinCommand) Run(client *client.RPCClient, args []string) error {
 		return err
 	}
 
-	args = cmdFlags.Args()
-	if len(args) == 0 {
+	nodes := cmdFlags.Args()
+	if len(nodes) == 0 {
 		return errors.Errorf("at least one address to join must be specified\n%s", t.Help())
 	}
 
-	n, err := client.Join(args, replayEvents)
+	return prov.DoWithClient(func(cli *client.RPCClient) error {
+		return t.doRun(cli, nodes, replayEvents)
+	})
+}
+
+func (t serfJoinCommand) doRun(client *client.RPCClient, nodes []string, replayEvents bool) error {
+
+	n, err := client.Join(nodes, replayEvents)
 	if err != nil {
-		return errors.Errorf("joining the cluster '%+v', %v", args, err)
+		return errors.Errorf("joining the cluster '%+v', %v", nodes, err)
 	}
 
 	fmt.Printf("Successfully joined cluster by contacting %d nodes.\n", n)

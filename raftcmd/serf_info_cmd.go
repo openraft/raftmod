@@ -45,7 +45,7 @@ func (t serfInfoCommand) Synopsis() string {
 	return "Provides debugging information for operators"
 }
 
-func (t serfInfoCommand) Run(client *client.RPCClient, args []string) error {
+func (t serfInfoCommand) Run(prov ClientProvider, args []string) error {
 
 	var format string
 	cmdFlags := flag.NewFlagSet("info", flag.ContinueOnError)
@@ -55,6 +55,13 @@ func (t serfInfoCommand) Run(client *client.RPCClient, args []string) error {
 	if err := cmdFlags.Parse(args); err != nil {
 		return err
 	}
+
+	return prov.DoWithClient(func(cli *client.RPCClient) error {
+		return t.doRun(cli, format)
+	})
+}
+
+func (t serfInfoCommand) doRun(client *client.RPCClient, format string) error {
 
 	stats, err := client.Stats()
 	if err != nil {

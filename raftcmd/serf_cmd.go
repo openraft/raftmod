@@ -63,7 +63,7 @@ func (t *serfCommand) Help() string {
 	helpText := `
 Usage: ./%s serf [command]
 
-	Provides management functionality for the Serf (gossip) server.
+   Provides management functionality for the Serf (gossip) server.
 
 Commands:
 
@@ -71,9 +71,13 @@ Commands:
 `
 	var lines []string
 	for _, cmd := range t.SerfCommands {
-		lines = append(lines, fmt.Sprintf("    %s           %s\n", cmd.SubCommand(), cmd.Synopsis()))
+		lines = append(lines, fmt.Sprintf("%s\t%s", cmd.SubCommand(), cmd.Synopsis()))
 	}
-	commands := columnize.SimpleFormat(lines)
+	commands := columnize.Format(lines, &columnize.Config{
+		Delim:  "\t",
+		Glue:   "  ",
+		Prefix: "   ",
+	})
 
 	return strings.TrimSpace(fmt.Sprintf(helpText, t.Application.Executable(), commands))
 }
@@ -98,17 +102,27 @@ func (t *serfCommand) Run(args []string) error {
 
 func (t *serfCommand) doRun(handler SerfCommand, args []string) error {
 	addr := t.getConnectAddress(t.SerfAddress)
-	config := client.Config{Addr: addr, AuthKey: t.SerfToken}
-	client, err := client.ClientFromConfig(&config)
+	prov := clientProviderImpl{Addr: addr, AuthKey: t.SerfToken}
+	err := handler.Run(prov, args)
 	if err != nil {
-		return errors.Errorf("Error connecting to Serf agent: %s", err)
-	}
-	defer client.Close()
-	err = handler.Run(client, args)
-	if err != nil {
-		return errors.Errorf("serf connect '%s', %v", addr, err)
+		return errors.Errorf("serf client '%s', %v", addr, err)
 	}
 	return nil
+}
+
+type clientProviderImpl struct {
+	Addr string
+	AuthKey string
+}
+
+func (t clientProviderImpl) DoWithClient(cb func(cli *client.RPCClient) error) error {
+	config := client.Config{Addr: t.Addr, AuthKey: t.AuthKey}
+	cli, err := client.ClientFromConfig(&config)
+	if err != nil {
+		return errors.Errorf("connecting to Serf agent, %v", err)
+	}
+	defer cli.Close()
+	return cb(cli)
 }
 
 func (t *serfCommand) subCommands() string {

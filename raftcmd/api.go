@@ -24,7 +24,7 @@ type SerfCommand interface {
 	Run sub command
 	*/
 
-	Run(client *client.RPCClient, args []string) error
+	Run(prov ClientProvider, args []string) error
 
 	/**
 	One line description of the command
@@ -33,3 +33,8 @@ type SerfCommand interface {
 
 }
 
+type ClientProvider interface {
+
+	DoWithClient(func(cli *client.RPCClient) error) error
+
+}

@@ -51,7 +51,7 @@ func (t serfMonitorCommand) Synopsis() string {
 	return "Stream logs from a Serf agent"
 }
 
-func (t serfMonitorCommand) Run(client *client.RPCClient, args []string) error {
+func (t serfMonitorCommand) Run(prov ClientProvider, args []string) error {
 	var logLevel string
 	cmdFlags := flag.NewFlagSet("monitor", flag.ContinueOnError)
 	cmdFlags.Usage = func() { println(t.Help()) }
@@ -60,6 +60,13 @@ func (t serfMonitorCommand) Run(client *client.RPCClient, args []string) error {
 	if err := cmdFlags.Parse(args); err != nil {
 		return err
 	}
+
+	return prov.DoWithClient(func(cli *client.RPCClient) error {
+		return t.doRun(cli, logLevel)
+	})
+}
+
+func (t serfMonitorCommand) doRun(client *client.RPCClient, logLevel string) error {
 
 	eventCh := make(chan map[string]interface{}, 1024)
 	streamHandle, err := client.Stream("*", eventCh)

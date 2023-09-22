@@ -40,7 +40,8 @@ func (t serfLeaveCommand) Synopsis() string {
 	return "Leaves the Serf cluster"
 }
 
-func (t serfLeaveCommand) Run(client *client.RPCClient, args []string) error {
+func (t serfLeaveCommand) Run(prov ClientProvider, args []string) error {
+
 	var force bool
 	var prune bool
 
@@ -49,13 +50,21 @@ func (t serfLeaveCommand) Run(client *client.RPCClient, args []string) error {
 	cmdFlags.BoolVar(&force, "force", false, "forces a member leave")
 	cmdFlags.BoolVar(&prune, "prune", false, "remove forcibly from list")
 
+	if err := cmdFlags.Parse(args); err != nil {
+		return err
+	}
+
+	nodes := cmdFlags.Args()
+
+	return prov.DoWithClient(func(cli *client.RPCClient) error {
+		return t.doRun(cli, nodes, force, prune)
+	})
+}
+
+func (t serfLeaveCommand) doRun(client *client.RPCClient, nodes []string, force, prune bool) error {
+
 	if force {
 
-		if err := cmdFlags.Parse(args); err != nil {
-			return err
-		}
-
-		nodes := cmdFlags.Args()
 		if len(nodes) != 1 {
 			return errors.Errorf("A node name must be specified to force leave.")
 		}

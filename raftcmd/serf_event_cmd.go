@@ -44,7 +44,8 @@ func (t serfEventCommand) Synopsis() string {
 	return "Emit a custom event through the Serf cluster"
 }
 
-func (t serfEventCommand) Run(client *client.RPCClient, args []string) error {
+func (t serfEventCommand) Run(prov ClientProvider, args []string) error {
+
 	var coalesce bool
 
 	cmdFlags := flag.NewFlagSet("event", flag.ContinueOnError)
@@ -64,6 +65,13 @@ func (t serfEventCommand) Run(client *client.RPCClient, args []string) error {
 
 	event := args[0]
 	payload := []byte(args[1])
+
+	return prov.DoWithClient(func(cli *client.RPCClient) error {
+		return t.doRun(cli, event, payload, coalesce)
+	})
+}
+
+func (t serfEventCommand) doRun(client *client.RPCClient, event string, payload []byte, coalesce bool) error {
 
 	if err := client.UserEvent(event, payload, coalesce); err != nil {
 		return errors.Errorf("sending event '%s', %v", event, err)

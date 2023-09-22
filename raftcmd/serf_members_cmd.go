@@ -77,7 +77,7 @@ func (t serfMembersCommand) Synopsis() string {
 	return "Lists the members of a Serf cluster"
 }
 
-func (t serfMembersCommand) Run(client *client.RPCClient, args []string) error {
+func (t serfMembersCommand) Run(prov ClientProvider, args []string) error {
 
 	var detailed bool
 	var statusFilter, nameFilter, format string
@@ -99,7 +99,14 @@ func (t serfMembersCommand) Run(client *client.RPCClient, args []string) error {
 		return errors.Errorf("unmarshal tags, %v", err)
 	}
 
-	members, err := client.MembersFiltered(reqTags, statusFilter, nameFilter)
+	return prov.DoWithClient(func(cli *client.RPCClient) error {
+		return t.doRun(cli, reqTags, statusFilter, nameFilter, format, detailed)
+	})
+}
+
+func (t serfMembersCommand) doRun(client *client.RPCClient, tags map[string]string, statusFilter, nameFilter, format string, detailed bool) error {
+
+	members, err := client.MembersFiltered(tags, statusFilter, nameFilter)
 	if err != nil {
 		return errors.Errorf("retrieving members, %v", err)
 	}

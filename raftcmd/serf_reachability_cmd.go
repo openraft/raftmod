@@ -55,7 +55,7 @@ func (t serfReachabilityCommand) Synopsis() string {
 	return "Emit a custom event through the Serf cluster"
 }
 
-func (t serfReachabilityCommand) Run(cli *client.RPCClient, args []string) error {
+func (t serfReachabilityCommand) Run(prov ClientProvider, args []string) error {
 	var verbose bool
 	cmdFlags := flag.NewFlagSet("reachability", flag.ContinueOnError)
 	cmdFlags.Usage = func() { println(t.Help()) }
@@ -64,6 +64,13 @@ func (t serfReachabilityCommand) Run(cli *client.RPCClient, args []string) error
 	if err := cmdFlags.Parse(args); err != nil {
 		return err
 	}
+
+	return prov.DoWithClient(func(cli *client.RPCClient) error {
+		return t.doRun(cli, verbose)
+	})
+}
+
+func (t serfReachabilityCommand) doRun(cli *client.RPCClient, verbose bool) error {
 
 	shutdownCh := makeShutdownCh()
 	ackCh := make(chan string, 128)
