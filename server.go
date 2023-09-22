@@ -8,7 +8,7 @@ package raftmod
 import (
 	"github.com/go-errors/errors"
 	"github.com/hashicorp/serf/serf"
-	"github.com/openraft/raftapi"
+	"github.com/sprintframework/raftapi"
 	"net"
 	"strconv"
 )

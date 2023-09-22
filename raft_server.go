@@ -11,7 +11,7 @@ import (
 	"github.com/codeallergy/glue"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/raft"
-	"github.com/openraft/raftapi"
+	"github.com/sprintframework/raftapi"
 	"github.com/pkg/errors"
 	"github.com/sprintframework/sprint"
 	"go.uber.org/atomic"

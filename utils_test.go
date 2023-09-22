@@ -7,7 +7,7 @@ package raftmod_test
 
 import (
 	"fmt"
-	"github.com/openraft/raftmod"
+	"github.com/sprintframework/raftmod"
 	"github.com/stretchr/testify/require"
 	"testing"
 )

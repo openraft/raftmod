@@ -11,7 +11,7 @@ import (
 	"github.com/dgraph-io/badger/v3"
 	"github.com/hashicorp/raft"
 	"github.com/pkg/errors"
-	"github.com/openraft/raftbadger"
+	"github.com/sprintframework/raft-badger"
 	"reflect"
 )
 

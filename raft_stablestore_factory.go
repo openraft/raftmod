@@ -7,7 +7,7 @@ package raftmod
 
 import (
 	"github.com/codeallergy/glue"
-	"github.com/openraft/raftbadger"
+	"github.com/sprintframework/raft-badger"
 	"github.com/keyvalstore/store"
 	"github.com/dgraph-io/badger/v3"
 	"github.com/hashicorp/raft"

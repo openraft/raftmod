@@ -1,4 +1,4 @@
-module github.com/openraft/raftmod
+module github.com/sprintframework/raftmod
 
 go 1.17
 
@@ -11,10 +11,10 @@ require (
 	github.com/hashicorp/raft v1.5.0
 	github.com/hashicorp/serf v0.10.1
 	github.com/keyvalstore/store v1.3.0
-	github.com/openraft/raftapi v1.2.5
-	github.com/openraft/raftbadger v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/ryanuber/columnize v0.0.0-20160712163229-9b3edd62028f
+	github.com/sprintframework/raft-badger v1.2.2
+	github.com/sprintframework/raftapi v1.2.10
 	github.com/sprintframework/sprint v1.3.7
 	github.com/stretchr/testify v1.8.2
 	go.uber.org/atomic v1.10.0
@@ -57,10 +57,10 @@ require (
 	github.com/miekg/dns v1.1.41 // indirect
 	github.com/mitchellh/cli v1.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.1.2 // indirect
-	github.com/openraft/raftpb v1.2.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/posener/complete v1.2.3 // indirect
 	github.com/sean-/seed v0.0.0-20170313163322-e2103e2c3529 // indirect
+	github.com/sprintframework/raftpb v1.2.10 // indirect
 	github.com/sprintframework/sprintpb v1.3.0 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect

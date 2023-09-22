@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"github.com/codeallergy/glue"
 	"github.com/hashicorp/serf/client"
-	"github.com/openraft/raftmod"
+	"github.com/sprintframework/raftmod"
 	"github.com/pkg/errors"
 	"github.com/ryanuber/columnize"
 	"github.com/sprintframework/sprint"

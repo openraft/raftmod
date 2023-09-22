@@ -8,7 +8,7 @@ package raftmod
 import (
 	"fmt"
 	"github.com/hashicorp/raft"
-	"github.com/openraft/raftapi"
+	"github.com/sprintframework/raftapi"
 	"sync"
 )
 

@@ -12,7 +12,7 @@ import (
 	"github.com/codeallergy/glue"
 	"github.com/go-errors/errors"
 	"github.com/hashicorp/raft"
-	"github.com/openraft/raftapi"
+	"github.com/sprintframework/raftapi"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

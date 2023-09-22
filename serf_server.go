@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/serf/cmd/serf/command/agent"
 	"github.com/hashicorp/serf/serf"
-	"github.com/openraft/raftapi"
+	"github.com/sprintframework/raftapi"
 	"github.com/sprintframework/sprint"
 	"go.uber.org/atomic"
 	"go.uber.org/zap"
