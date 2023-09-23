@@ -20,7 +20,7 @@ var StableStoreClass = reflect.TypeOf((*raft.StableStore)(nil)).Elem()
 type implRaftStableStoreFactory struct {
 
 	RaftStore     store.ManagedDataStore    `inject:"bean=raft-store"`
-	RaftConfPrefix string `value:"raft.storage.stable-prefix,default=conf"`
+	RaftConfPrefix string `value:"raft-store.conf-prefix,default=conf"`
 }
 
 func RaftStableStoreFactory() glue.FactoryBean {

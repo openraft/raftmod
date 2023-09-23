@@ -20,7 +20,7 @@ var LogStoreClass = reflect.TypeOf((*raft.LogStore)(nil)).Elem()
 type implRaftLogStoreFactory struct {
 
 	RaftStore     store.ManagedDataStore    `inject:"bean=raft-store"`
-	RaftLogPrefix string `value:"raft.storage.log-prefix,default=log"`
+	RaftLogPrefix string `value:"raft-store.log-prefix,default=log"`
 
 }
 
