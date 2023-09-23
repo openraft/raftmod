@@ -19,8 +19,8 @@ var LogStoreClass = reflect.TypeOf((*raft.LogStore)(nil)).Elem()
 
 type implRaftLogStoreFactory struct {
 
-	RaftStore     store.ManagedDataStore    `inject:"bean=raft-storage"`
-	RaftLogPrefix string `value:"raft-storage.log-prefix,default=log"`
+	RaftStore     store.ManagedDataStore    `inject:"bean=raft-store"`
+	RaftLogPrefix string `value:"raft.storage.log-prefix,default=log"`
 
 }
 
@@ -34,7 +34,7 @@ func (t *implRaftLogStoreFactory) Object() (object interface{}, err error) {
 
 	db, ok := t.RaftStore.Instance().(*badger.DB)
 	if !ok {
-		return nil, errors.New("managed data delegate 'raft-storage' must have badger backend")
+		return nil, errors.New("managed data delegate 'raft-store' must have badger backend")
 	}
 
 	return raftbadger.NewLogStore(db, []byte(t.RaftLogPrefix)), nil
@@ -46,7 +46,7 @@ func (t *implRaftLogStoreFactory) ObjectType() reflect.Type {
 }
 
 func (t *implRaftLogStoreFactory) ObjectName() string {
-	return "raft-storage-log"
+	return "raft-store-log"
 }
 
 func (t *implRaftLogStoreFactory) Singleton() bool {

@@ -38,8 +38,32 @@ type implSerfServer struct {
 
 	EventHandlers   []agent.EventHandler   `inject`
 
-	RPCAddress     string     `value:"serf-server.rpc-address,default=:8700"`
-	RPCAuthKey     string     `value:"serf-server.rpc-auth,default="`
+	/**
+	RPCAddr is the address and port to listen on for the agent's RPC interface.
+	 */
+
+	RPCAddress     string     `value:"serf.rpc-address,default=:8700"`
+
+	/**
+	RPCAuthKey is a key that can be set to optionally require that
+	RPC's provide an authentication key.
+	 */
+	RPCAuthKey     string     `value:"serf.rpc-auth,default="`
+
+	/**
+	Discover is used to setup an mDNS Discovery name. When this is set, the
+	Serf agent will setup an mDNS responder and periodically run an mDNS query
+	to look for peers. For peers on a network that supports multicast, this
+	allows Serf agents to join each other with zero configuration.
+	 */
+	Discover string           `value:"serf.discover,default="`
+
+	/**
+	Interface is used to provide a binding interface to use. It can be used instead of
+	providing a bind address, as Serf will discover the address of the provided interface.
+	It is also used to set the multicast device used with `discover`.
+	 */
+	Interface string          `value:"serf.iface,default="`
 
 	alive        atomic.Bool
 	shutdownOnce sync.Once

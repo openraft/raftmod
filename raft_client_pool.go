@@ -28,9 +28,9 @@ type implRaftClientPool struct {
 	Properties      glue.Properties     `inject`
 	Log             *zap.Logger         `inject`
 
-	RaftAddress       string `value:"raft-server.listen-address,default="`
-	RPCBean           string `value:"raft-server.rpc-bean,default="`
-	RaftServiceName   string `value:"raft-server.raft-service-name,default="`
+	RaftAddress    string `value:"raft.bind-address,default="`
+	RPCBean        string `value:"raft.rpc-bean-name,default="`
+	RPCServiceName string `value:"raft.rpc-service-name,default="`
 
 	portDiff          int
 
@@ -55,19 +55,19 @@ func RaftClientPool() raftapi.RaftClientPool {
 }
 
 func (t *implRaftClientPool) PostConstruct() error {
-	if t.RaftServiceName == "" {
-		t.Log.Warn("property 'raft-server.raft-service-name' is empty, health check would be disabled")
+	if t.RPCServiceName == "" {
+		t.Log.Warn("property 'raft.rpc-service-name' is empty, health check would be disabled")
 	}
 
 	if t.RaftAddress != "" && t.RPCBean != "" {
 		raftPort, err := getPortNumber(t.RaftAddress)
 		if err != nil {
-			return errors.Errorf("invalid port in property 'raft-server.listen-address', %v", err)
+			return errors.Errorf("invalid port in property 'raft.bind-address', %v", err)
 		}
-		prop := t.RPCBean + ".listen-address"
+		prop := t.RPCBean + ".bind-address"
 		value := t.Properties.GetString(prop, "")
 		if value == "" {
-			return errors.Errorf("empty property '%s' needed by 'raft-server.rpc-bean' reference", prop)
+			return errors.Errorf("empty property '%s' needed by 'raft.rpc-bean-name' reference", prop)
 		}
 		rpcPort, err := getPortNumber(value)
 		if err != nil {
@@ -75,7 +75,7 @@ func (t *implRaftClientPool) PostConstruct() error {
 		}
 		t.portDiff = rpcPort - raftPort
 	} else {
-		t.Log.Warn("property 'raft-server.listen-address' or 'raft-server.rpc-bean' is empty")
+		t.Log.Warn("property 'raft.bind-address' or 'raft.rpc-bean-name' is empty")
 	}
 	return nil
 }
@@ -158,7 +158,7 @@ func (t *implRaftClientPool) doConnect(raftAddress raft.ServerAddress) (*clientC
 
 	t.Log.Info("Connected", zap.String("endpoint", endpoint), zap.String("raftAddress", string(raftAddress)), zap.String("state", conn.GetState().String()))
 
-	if t.RaftServiceName != "" {
+	if t.RPCServiceName != "" {
 		go t.doHealthCheck(client)
 	}
 
@@ -168,7 +168,7 @@ func (t *implRaftClientPool) doConnect(raftAddress raft.ServerAddress) (*clientC
 func (t *implRaftClientPool) doHealthCheck(client *clientConnection) {
 
 	resp, err := client.serviceHC.Check(context.Background(), &grpc_health_v1.HealthCheckRequest{
-		Service: t.RaftServiceName,
+		Service: t.RPCServiceName,
 	})
 
 	if err != nil {
@@ -183,7 +183,7 @@ func (t *implRaftClientPool) doHealthCheck(client *clientConnection) {
 	t.Log.Info("HealthCheckStatus", zap.String("status", resp.Status.String()), zap.String("endpoint", client.endpoint), zap.String("raftAddress", string(client.raftAddress)))
 
 	w, err := client.serviceHC.Watch(context.Background(), &grpc_health_v1.HealthCheckRequest{
-		Service: t.RaftServiceName,
+		Service: t.RPCServiceName,
 	})
 	if err != nil {
 		t.Log.Error("HealthCheckWatch", zap.String("endpoint", client.endpoint), zap.String("raftAddress", string(client.raftAddress)), zap.Error(err))

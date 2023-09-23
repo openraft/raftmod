@@ -19,8 +19,8 @@ var StableStoreClass = reflect.TypeOf((*raft.StableStore)(nil)).Elem()
 
 type implRaftStableStoreFactory struct {
 
-	RaftStore     store.ManagedDataStore    `inject:"bean=raft-storage"`
-	RaftConfPrefix string `value:"raft-storage.stable-prefix,default=conf"`
+	RaftStore     store.ManagedDataStore    `inject:"bean=raft-store"`
+	RaftConfPrefix string `value:"raft.storage.stable-prefix,default=conf"`
 }
 
 func RaftStableStoreFactory() glue.FactoryBean {
@@ -33,7 +33,7 @@ func (t *implRaftStableStoreFactory) Object() (object interface{}, err error) {
 
 	db, ok := t.RaftStore.Instance().(*badger.DB)
 	if !ok {
-		return nil, errors.Errorf("managed data delegate 'raft-storage' must have badger backend")
+		return nil, errors.Errorf("managed data delegate 'raft-store' must have badger backend")
 	}
 
 	return raftbadger.NewStableStore(db, []byte(t.RaftConfPrefix)), nil
@@ -45,7 +45,7 @@ func (t *implRaftStableStoreFactory) ObjectType() reflect.Type {
 }
 
 func (t *implRaftStableStoreFactory) ObjectName() string {
-	return "raft-storage-stable"
+	return "raft-store-stable"
 }
 
 func (t *implRaftStableStoreFactory) Singleton() bool {

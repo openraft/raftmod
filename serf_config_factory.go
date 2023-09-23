@@ -28,9 +28,9 @@ type implSerfConfigFactory struct {
 	Application     sprint.Application  `inject`
 	NodeService     sprint.NodeService  `inject`
 
-	SerfAddress  string            `value:"serf-server.listen-address,default="`
-	RaftAddress  string            `value:"raft-server.listen-address,default="`
-	RPCBean      string            `value:"raft-server.rpc-bean,default="`
+	SerfAddress  string            `value:"serf.bind-address,default="`
+	RaftAddress  string            `value:"raft.bind-address,default="`
+	RPCBean      string            `value:"raft.rpc-bean-name,default="`
 
 	DataDir           string       `value:"application.data.dir,default="`
 	DataDirPerm       os.FileMode  `value:"application.perm.data.dir,default=-rwxrwx---"`
@@ -81,12 +81,12 @@ func (t *implSerfConfigFactory) Object() (object interface{}, err error) {
 	conf.Tags["build"] = t.Application.Build()
 
 	if t.SerfAddress == "" {
-		return nil, errors.New("required property 'serf-server.listen-address' is empty")
+		return nil, errors.New("required property 'serf.bind-address' is empty")
 	}
 
 	tcpAddr, err := ParseAndAdjustTCPAddr(t.SerfAddress, t.NodeService.NodeSeq())
 	if err != nil {
-		return nil, errors.Errorf("issue in property 'serf-server.listen-address', %v", err)
+		return nil, errors.Errorf("issue in property 'serf.bind-address', %v", err)
 	}
 
 	memberConfig := conf.MemberlistConfig
@@ -99,16 +99,16 @@ func (t *implSerfConfigFactory) Object() (object interface{}, err error) {
 	if t.RaftAddress != "" {
 		raftPort, err := getPortNumber(t.RaftAddress)
 		if err != nil {
-			return nil, errors.Errorf("invalid port in property 'raft-server.listen-address', %v", err)
+			return nil, errors.Errorf("invalid port in property 'raft.bind-address', %v", err)
 		}
 		conf.Tags["raft-port"] = strconv.Itoa(raftPort)
 	}
 
 	if t.RPCBean != "" {
-		propName := fmt.Sprintf("%s.%s", t.RPCBean, "listen-address")
+		propName := fmt.Sprintf("%s.%s", t.RPCBean, "bind-address")
 		value := t.Properties.GetString(propName, "")
 		if value == "" {
-			return nil, errors.Errorf("empty property '%s' needed by 'raft-server.rpc-bean' reference", propName)
+			return nil, errors.Errorf("empty property '%s' needed by 'raft.rpc-bean-name' reference", propName)
 		}
 		rpcPort, err := getPortNumber(value)
 		if err != nil {

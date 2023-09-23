@@ -38,8 +38,8 @@ type implRaftServer struct {
 
 	ServerLookup       raftapi.ServerLookup  `inject`
 
-	SerfAddress       string       `value:"serf-server.listen-address,default="`
-	SerfQueueSize     int          `value:"serf-server.queue-size,default=2048"`
+	SerfAddress       string       `value:"serf.bind-address,default="`
+	SerfQueueSize     int          `value:"serf.queue-size,default=2048"`
 
 	//SerfConfig   *serf.Config `inject`
 	//serf         *serf.Serf
@@ -53,9 +53,9 @@ type implRaftServer struct {
 	// should be defined by application
 	FSM      raft.FSM   `inject`
 
-	RaftAddress  string          `value:"raft-server.listen-address,default="`
-	MaxPool      int             `value:"raft-server.max-pool,default=3"`
-	Timeout      time.Duration   `value:"raft-server.timeout,default=10s"`
+	RaftAddress  string          `value:"raft.bind-address,default="`
+	MaxPool      int             `value:"raft.max-pool,default=3"`
+	Timeout      time.Duration   `value:"raft.timeout,default=10s"`
 
 	listener  net.Listener
 	transport *raft.NetworkTransport
@@ -96,18 +96,18 @@ func (t *implRaftServer) GetStats(cb func(name, value string) bool) error {
 func (t *implRaftServer) Bind() (err error) {
 
 	if t.RaftAddress == "" {
-		t.Log.Warn("RaftAddressEmpty", zap.String("prop", "raft-server.listen-address"))
+		t.Log.Warn("RaftAddressEmpty", zap.String("prop", "raft.bind-address"))
 		return nil
 	}
 
 	if t.SerfAddress == "" {
-		t.Log.Warn("SerfAddressEmpty", zap.String("prop", "raft-server.serf-address"))
+		t.Log.Warn("SerfAddressEmpty", zap.String("prop", "raft.bind-address"))
 		return nil
 	}
 
 	raftAddr, err := ParseAndAdjustTCPAddr(t.RaftAddress, t.NodeService.NodeSeq())
 	if err != nil {
-		return errors.Errorf("issue in property 'raft-server.listen-address', %v", err)
+		return errors.Errorf("issue in property 'raft.bind-address', %v", err)
 	}
 	t.RaftAddress = fmt.Sprintf("%s:%d", raftAddr.IP.String(), raftAddr.Port)
 

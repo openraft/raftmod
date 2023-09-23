@@ -20,12 +20,12 @@ var SnapshotStoreClass = reflect.TypeOf((*raft.SnapshotStore)(nil)).Elem()
 
 type implRaftSnapshotFactory struct {
 
-	Application sprint.Application `inject`
-	Properties  glue.Properties `inject`
+	Application sprint.Application   `inject`
+	Properties  glue.Properties      `inject`
 	SystemEnvironmentPropertyResolver sprint.SystemEnvironmentPropertyResolver `inject`
 
-	RetainSnapshotCount int    `value:"raft-snapshot.retain-count,default=5"`
-	KeyProperty         string `value:"raft-snapshot.key-bean,default="`
+	RetainSnapshotCount int    `value:"raft.snapshot-retain-count,default=5"`
+	KeyProperty         string `value:"raft.snapshot-key-bean,default="`
 
 	DataDir           string       `value:"application.data.dir,default="`
 	DataDirPerm       os.FileMode  `value:"application.perm.data.dir,default=-rwxrwx---"`
