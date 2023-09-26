@@ -5,7 +5,7 @@
 
 package raftmod
 
-var Scan = []interface{}{
+var RaftServices = []interface{}{
 	RaftLogStoreFactory(),
 	RaftStableStoreFactory(),
 	RaftSnapshotFactory(),

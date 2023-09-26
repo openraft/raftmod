@@ -3,7 +3,7 @@ module github.com/sprintframework/raftmod
 go 1.17
 
 require (
-	github.com/codeallergy/glue v1.1.0
+	github.com/codeallergy/glue v1.1.3
 	github.com/dgraph-io/badger/v3 v3.2103.5
 	github.com/go-errors/errors v1.4.2
 	github.com/hashicorp/go-hclog v1.5.0
@@ -14,8 +14,8 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/ryanuber/columnize v0.0.0-20160712163229-9b3edd62028f
 	github.com/sprintframework/raft-badger v1.2.2
-	github.com/sprintframework/raftapi v1.2.11
-	github.com/sprintframework/sprint v1.3.8
+	github.com/sprintframework/raftapi v1.2.12
+	github.com/sprintframework/sprint v1.3.14
 	github.com/stretchr/testify v1.8.2
 	go.uber.org/atomic v1.10.0
 	go.uber.org/zap v1.24.0
