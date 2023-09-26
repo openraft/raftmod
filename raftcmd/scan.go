@@ -5,7 +5,7 @@
 
 package raftcmd
 
-var Scan = []interface{}{
+var RaftCommands = []interface{}{
 	SerfJoinCommand(),
 	SerfMembersCommand(),
 	SerfEventCommand(),
